@@ -1,0 +1,136 @@
+<h1>Où ?</h1>
+  
+<div id="geoloc-map">
+  <div id="geoloc-map-meta">
+    <!-- geosearch autocomplete -->
+    <mat-form-field style="width: 100%;">
+      <input matInput [formControl]="geoSearchFormGroup.controls.placeInput" placeholder="Trouver un lieu" aria-label="Trouver un lieu" [matAutocomplete]="auto">
+      <mat-spinner *ngIf="isLoadingAddress" diameter="20" matSuffix></mat-spinner>
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addressSelectedChanged($event)">
+        <mat-option *ngFor="let address of geoSearchResults" [value]="address">
+          <span>{{ address | osmPlaceReadableAddress }}</span>
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+    
+    <div class="geolocationInputs">
+      <div [formGroup]="latlngFormGroup">
+        <div class="latLngMenuInputs">
+          <!-- latitude / longitude decimal format -->
+          <div *ngIf="coordFormat=='decimal'">
+            <!-- latitude / longitude format selection -->  
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-form-field>
+              <input matInput formControlName="latInput" placeholder="latitude">
+              <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
+              <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <input matInput formControlName="lngInput" placeholder="longitude">
+              <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
+              <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
+            </mat-form-field>
+            
+            <button mat-icon-button (click)="addMarkerFromLatLngCoord()" color="primary">
+              <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- menu format decimal / dms-->
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="test('dms')">Degrés minutes secondes</button>
+          <button mat-menu-item (click)="test('decimal')">Décimal</button>
+        </mat-menu>
+
+        <!-- latitude / longitude DMS format -->
+        <div *ngIf="coordFormat=='dms'">
+          <!-- latitude / longitude format selection -->  
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+
+          <mat-form-field>
+            <input matInput formControlName="dmsLatInput" placeholder="(deg)°  (min)'  (sec)&quot;">
+            <span matPrefix>N&nbsp;</span>
+            <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
+            <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <input matInput formControlName="dmsLngInput" placeholder="(deg)°  (min)'  (sec)&quot;">
+            <span matPrefix>E&nbsp;</span>
+            <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
+            <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
+          </mat-form-field>
+
+          <button mat-icon-button (click)="addMarkerFromDmsCoord()" color="primary">
+            <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
+          </button>
+        </div>
+      </div>
+    
+      <!-- elevation -->
+      <div [formGroup]="elevationFormGroup">
+        <mat-form-field style="width: 100px;">
+          <input matInput formControlName="elevationInput" placeholder="altitude">
+          <mat-spinner *ngIf="isLoadingElevation" diameter="20" matSuffix></mat-spinner>
+          <span matSuffix>m</span>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <div id="geoloc-map-draw" style="height: 400px;"
+      leaflet 
+      [leafletOptions]="options"
+      (leafletMapReady)="onMapReady($event)">
+  </div>
+</div>
+
+<!-- geolocated photo data table -->
+<table mat-table *ngIf="geolocatedPhotoLatLngData.length > 0" class="geolocatedPhotoMetadataTable" [dataSource]="geolocatedPhotoLatLngData">
+
+  <!-- selection Column -->
+  <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef> Utiliser ce point </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button color="primary">
+          <mat-icon matTooltip="Utiliser ces valeurs" (click)="gpsMarkerSetValues(element.latDec, element.lngDec, element.altitude)">where_to_vote</mat-icon>
+        </button>
+      </td>
+  </ng-container>
+
+  <!-- photoName Column -->
+  <ng-container matColumnDef="photoName">
+    <th mat-header-cell *matHeaderCellDef> Fichier </th>
+    <td mat-cell *matCellDef="let element"> {{element.photoName}} </td>
+  </ng-container>
+
+  <!-- latitude Column -->
+  <ng-container matColumnDef="lat">
+    <th mat-header-cell *matHeaderCellDef> Lat. </th>
+    <td mat-cell *matCellDef="let element"> {{element.lat.deg}}° {{element.lat.min}}' {{element.lat.sec}}" </td>
+  </ng-container>
+
+  <!-- longitude Column -->
+  <ng-container matColumnDef="lng">
+    <th mat-header-cell *matHeaderCellDef> Lng. </th>
+    <td mat-cell *matCellDef="let element"> {{element.lng.deg}}° {{element.lng.min}}' {{element.lng.sec}}" </td>
+  </ng-container>
+
+  <!-- altitude Column + actions -->
+  <ng-container matColumnDef="altitude">
+    <th mat-header-cell *matHeaderCellDef> Altitude </th>
+    <td mat-cell *matCellDef="let element">
+      {{element.altitude}} m
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="geolocatedPhotoLatLngDisplayedColumnsTable"></tr>
+  <tr mat-row *matRowDef="let row; columns: geolocatedPhotoLatLngDisplayedColumnsTable;"></tr>
+
+</table>

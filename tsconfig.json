@@ -15,6 +15,14 @@
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "paths": {
+      "tb-geoloc-lib": [
+        "dist/tb-geoloc-lib"
+      ],
+      "tb-geoloc-lib/*": [
+        "dist/tb-geoloc-lib/*"
+      ]
+    }
   }
 }

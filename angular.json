@@ -23,7 +23,9 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss",
+              "./node_modules/leaflet/dist/leaflet.css",
+              "./node_modules/leaflet-draw/dist/leaflet.draw.css"
             ],
             "scripts": []
           },
@@ -115,6 +117,46 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": "e2e/tsconfig.e2e.json",
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "tb-geoloc-lib": {
+      "root": "projects/tb-geoloc-lib",
+      "sourceRoot": "projects/tb-geoloc-lib/src",
+      "projectType": "library",
+      "prefix": "tb-geoloc",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/tb-geoloc-lib/tsconfig.lib.json",
+            "project": "projects/tb-geoloc-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "project": "projects/tb-geoloc-lib/ng-package.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/tb-geoloc-lib/src/test.ts",
+            "tsConfig": "projects/tb-geoloc-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/tb-geoloc-lib/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/tb-geoloc-lib/tsconfig.lib.json",
+              "projects/tb-geoloc-lib/tsconfig.spec.json"
+            ],
             "exclude": [
               "**/node_modules/**"
             ]

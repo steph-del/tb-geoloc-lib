@@ -1,0 +1,40 @@
+[hidden] {
+  display: none !important;
+}
+
+#geoloc-map {
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+
+  #geoloc-map-meta {
+    flex: 1;
+    padding: 15px;
+
+    .geolocationInputs {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  #geoloc-map-draw {
+    position: relative;
+    flex: 3;
+  }
+
+  #httpTasksRunningSpinner {
+    flex: 1;
+  }
+}
+
+button {
+  .mini {
+    min-width: 0px;
+    line-height: 30px;
+  }
+}
+
+.geolocatedPhotoMetadataTable {
+  width: 100%;
+}
