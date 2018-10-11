@@ -189,8 +189,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
       // Description needed
       this.geolocatedPhotoLatLngData.forEach(data => {
-        const _latDms = data.lat.deg + '(deg)° ' + data.lat.min + '(min)\'' + data.lat.sec + '(sec)"';
-        const _lngDms = data.lng.deg + '(deg)° ' + data.lng.min + '(min)\'' + data.lng.sec + '(sec)"';
+        const _latDms = data.lat.deg + '° ' + data.lat.min + '\'' + data.lat.sec + '"';
+        const _lngDms = data.lng.deg + '° ' + data.lng.min + '\'' + data.lng.sec + '"';
         const g = new GeoPoint(_lngDms, _latDms);
         data.latDec = g.latDec;
         data.lngDec = g.lonDec;
