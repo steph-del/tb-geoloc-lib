@@ -508,22 +508,22 @@ export class MapComponent implements OnInit, OnDestroy {
       osmPlace = data;
     }
 
-    this._location.elevation = elevation;
-    this._location.geometry = osmPlace.geojson;
-    this._location.localityConsistency = true;   // perform
-    this._location.locationAccuracy = 0;         // perform
-    this._location.osmCountry = osmPlace.address.country;
-    this._location.osmCountryCode = osmPlace.address.country_code;
-    this._location.osmCounty = osmPlace.address.county;
-    this._location.osmId = osmPlace.osm_id;
-    this._location.osmNeighbourhood = null;      // not provided by nominatim
-    this._location.osmPlaceId = osmPlace.place_id;
-    this._location.osmPostcode = osmPlace.address.postcode;
-    this._location.osmRoad = osmPlace.address.road;
-    this._location.osmState = osmPlace.address.state;
-    this._location.osmSuburb = osmPlace.address.suburb;
-    this._location.publishedLocation = null;     // perform
-    this._location.station = null;               // perform
+    this._location.elevation = this._location.elevation ? elevation : null;
+    this._location.geometry = this._location.geometry ? osmPlace.geojson : null;
+    this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform
+    this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform
+    this._location.osmCountry = this._location.osmCountry ? osmPlace.address.country : null;
+    this._location.osmCountryCode = this._location.osmCountryCode ? osmPlace.address.country_code : null;
+    this._location.osmCounty = this._location.osmCounty ? osmPlace.address.county : null;
+    this._location.osmId = this._location.osmId ? osmPlace.osm_id : null;
+    this._location.osmNeighbourhood = this._location.osmNeighbourhood ? null : null;      // not provided by nominatim
+    this._location.osmPlaceId = this._location.osmPlaceId ? osmPlace.place_id : null;
+    this._location.osmPostcode = this._location.osmPostcode ? osmPlace.address.postcode : null;
+    this._location.osmRoad = this._location.osmRoad ? osmPlace.address.road : null;
+    this._location.osmState = this._location.osmState ? osmPlace.address.state : null;
+    this._location.osmSuburb = this._location.osmSuburb ? osmPlace.address.suburb : null;
+    this._location.publishedLocation = this._location.publishedLocation ? null : null;     // perform
+    this._location.station = this._location.station ? null : null;               // perform
 
     // Verifications
   }
