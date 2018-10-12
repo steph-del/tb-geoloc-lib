@@ -123,8 +123,7 @@ export class MapComponent implements OnInit, OnDestroy {
       // Show / hide control panels
       // if ONE item is drawn, set place and elevation inputs (call API)
       if (this.drawnItems.getLayers().length > 0) {
-        this.map.removeControl(this.drawControlFull);
-        this.map.addControl(leafletObjects.drawControlEditPanel(this.drawnItems));
+        this.setMapEditMode();
       }
       if (this.drawnItems.getLayers().length === 1) {
         this.setInputValues();
@@ -133,8 +132,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     this.map.on('draw:deleted', (e) => {
       if (this.drawnItems.getLayers().length === 0) {
-        this.map.removeControl(leafletObjects.drawControlEditPanel(this.drawnItems));
-        this.map.addControl(this.drawControlFull);
+        this.setMapDrawMode();
       }
       this.clearDrawnItemsLayer();
       this.clearForm();
@@ -227,6 +225,22 @@ export class MapComponent implements OnInit, OnDestroy {
     } else {
       this.map.invalidateSize();
     }
+  }
+
+  /**
+   * Show the "edit" toolbar inside map
+   */
+  setMapEditMode() {
+    this.map.removeControl(this.drawControlFull);
+    this.map.addControl(leafletObjects.drawControlEditPanel(this.drawnItems));
+  }
+
+  /**
+   * Show the "draw" toolbar inside map
+   */
+  setMapDrawMode() {
+    this.map.removeControl(leafletObjects.drawControlEditPanel(this.drawnItems));
+    this.map.addControl(this.drawControlFull);
   }
 
   /**
@@ -417,7 +431,11 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    */
   addMarkerFromDmsCoord(avoidCallingElevationApi = false, avoidCallingGeolocApi = false) {
+    // clear drawn items layer
     this.clearDrawnItemsLayer();
+
+    // update map toolbar
+    this.setMapEditMode();
     // @TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
@@ -428,7 +446,12 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    */
   addMarkerFromLatLngCoord(avoidCallingElevationApi = false, avoidCallingGeolocApi = false) {
+    // clear drawn items layer
     this.clearDrawnItemsLayer();
+
+    // update map toolbar
+    this.setMapEditMode();
+
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
@@ -524,10 +547,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // clear geolocated photos layer
     this.geolocatedPhotoLatLngLayer.clearLayers();
-
-    // update map toolbar
-    this.map.removeControl(this.drawControlFull);
-    this.map.addControl(leafletObjects.drawControlEditPanel(this.drawnItems));
   }
 
   latLngDmsAutoFormatter(value): string {
