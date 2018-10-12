@@ -472,7 +472,6 @@ export class MapComponent implements OnInit, OnDestroy {
     this.elevationFormGroup.reset();
 
     this.geoSearchFormGroup.controls.placeInput.setValue('', {emitEvent: false});
-    this.geoSearchFormGroup.reset();
   }
 
   /**
