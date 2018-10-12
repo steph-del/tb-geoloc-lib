@@ -128,6 +128,8 @@ export class MapComponent implements OnInit, OnDestroy {
       if (this.drawnItems.getLayers().length === 1) {
         this.setInputValues();
       }
+
+      this.flyToDrawnItems();
     });
 
     this.map.on('draw:deleted', (e) => {
@@ -184,6 +186,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Watch geolocated photo input changes
     this.geolocatedPhotoLatLng.subscribe(photoLatLng => {
+      // @todo clear this.geolocatedPhotoLatLngLayer
+
       this.geolocatedPhotoLatLngData = photoLatLng;
 
       // Description needed
@@ -207,7 +211,7 @@ export class MapComponent implements OnInit, OnDestroy {
       });
 
       // Fit map to geolocated photos markers
-      // @Todo
+      this.flyToGeolocatedPhotoItems();
     });
   }
 
@@ -242,6 +246,30 @@ export class MapComponent implements OnInit, OnDestroy {
   setMapDrawMode() {
     this.map.removeControl(leafletObjects.drawControlEditPanel(this.drawnItems));
     this.map.addControl(this.drawControlFull);
+  }
+
+  /**
+   *
+   */
+  flyToDrawnItems() {
+    const b = this.drawnItems.getBounds();
+    this.map.flyToBounds(b);
+  }
+
+  /**
+   *
+   */
+  flyToGeoResultsItems() {
+    const b = this.geoResultsLayer.getBounds();
+    this.map.flyToBounds(b);
+  }
+
+  /**
+   *
+   */
+  flyToGeolocatedPhotoItems() {
+    const b = this.geolocatedPhotoLatLngLayer.getBounds();
+    this.map.flyToBounds(b);
   }
 
   /**
@@ -412,6 +440,9 @@ export class MapComponent implements OnInit, OnDestroy {
     this.clearGeoResultsLayer();
     this.geoResultsLayer.addData(osmPlace.geojson);
 
+    // Fly
+    this.flyToGeoResultsItems();
+
     // Patch input value
     this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace), {emitEvent: false});
     // Fill latitude, longitude & altitude inputs
@@ -441,6 +472,9 @@ export class MapComponent implements OnInit, OnDestroy {
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
     this.setInputValues(avoidCallingElevationApi, avoidCallingGeolocApi);
+
+    // Fly
+    this.flyToDrawnItems();
   }
 
   /**
@@ -457,6 +491,9 @@ export class MapComponent implements OnInit, OnDestroy {
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
     this.setInputValues(avoidCallingElevationApi, avoidCallingGeolocApi);
+
+    // Fly
+    this.flyToDrawnItems();
   }
 
   /**
