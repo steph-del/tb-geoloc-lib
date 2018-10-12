@@ -134,6 +134,7 @@ export class MapComponent implements OnInit, OnDestroy {
       if (this.drawnItems.getLayers().length === 0) {
         this.setMapDrawMode();
       }
+      this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
       this.clearForm();
     });
@@ -408,7 +409,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.fitBounds(L.latLngBounds(southWest, northEast));
 
     // Add geojson to the map
-    this.geoResultsLayer.clearLayers();
+    this.clearGeoResultsLayer();
     this.geoResultsLayer.addData(osmPlace.geojson);
 
     // Patch input value
@@ -472,6 +473,13 @@ export class MapComponent implements OnInit, OnDestroy {
     this.elevationFormGroup.reset();
 
     this.geoSearchFormGroup.controls.placeInput.setValue('', {emitEvent: false});
+  }
+
+  /**
+   * Clear geoResults layer (eg this layer contains administrative polygons -- "commune")
+   */
+  clearGeoResultsLayer() {
+    this.geoResultsLayer.clearLayers();
   }
 
   /**
