@@ -99,7 +99,7 @@ export const gpsPhotoMarkerIcon = (): L.Icon => {
     // shadowSize:   [50, 64], // size of the shadow
     iconAnchor:   [13, 40], // point of the icon which will correspond to marker's location
     // shadowAnchor: [4, 62],  // the same for the shadow
-    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+    popupAnchor:  [5, -41] // point from which the popup should open relative to the iconAnchor
   });
 };
 

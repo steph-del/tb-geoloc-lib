@@ -203,10 +203,14 @@ export class MapComponent implements OnInit, OnDestroy {
         const gpsPhotoMarker = new L.Marker(latLng, { icon: leafletObjects.gpsPhotoMarkerIcon() });
         const html = `
           <b>Fichier "${data.photoName}"</b><br>
-          Lat. : ${g.latDeg}<br>
-          Lng. : ${g.lonDeg}<br><br>
-          Utilisez l'icone <mat-icon matTooltip="Utiliser ces valeurs">where_to_vote</mat-icon> pour selectionner le point à utiliser.`;
+          Lat. : ${g.latDeg}<br />
+          Lng. : ${g.lonDeg}<br />
+          Alt. : ${data.altitude} m<br /><br />
+          <b>Cliquez sur le point pour utiliser ces coordonnées</b>`;
         gpsPhotoMarker.bindPopup(html).openPopup();
+        gpsPhotoMarker.on('click', (event => { this.gpsMarkerSetValues(data.latDec, data.lngDec, data.altitude); }));
+        gpsPhotoMarker.on('mouseover', (event) => { gpsPhotoMarker.openPopup(); });
+        gpsPhotoMarker.on('mouseout', (event => { gpsPhotoMarker.closePopup(); }));
         gpsPhotoMarker.addTo(this.geolocatedPhotoLatLngLayer);
       });
 
