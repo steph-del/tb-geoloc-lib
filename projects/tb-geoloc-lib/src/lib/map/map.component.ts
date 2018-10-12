@@ -538,7 +538,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Latitude / longitude DMS format check
    */
   latLngDmsValidator(control: FormControl) {
-    const regexp = new RegExp('^(\\-)?[0-9]{2}\\° [0-9]{2}\\\' [0-9]{2}\\.[0-9]{2,12}\\"');
+    const regexp = new RegExp('^(\\-)?[0-9]{1,2}\\° [0-9]{1,2}\\\' [0-9]{1,2}\\.[0-9]{1,12}\\"');
     return regexp.test(control.value) ? null : { malformedLatLngDmsFormat: true };
   }
 
@@ -546,7 +546,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Latitude / longitude decimal format check
    */
   latLngDecValidator(control: FormControl) {
-    const regexp = new RegExp('^(\\-)?[0-9]{2}\\.[0-9]{2,20}');
+    const regexp = new RegExp('^(\\-)?[0-9]{1,2}\\.[0-9]{1,20}');
     return regexp.test(control.value) ? null : { malformedLatLngDecFormat: true };
   }
 }
