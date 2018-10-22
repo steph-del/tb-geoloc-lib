@@ -92,7 +92,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // Leaflet map configuration
   drawnItems = new L.FeatureGroup();  // all drawn items
   drawControlFull = leafletObjects.drawControlPanel;      // draw panel
-  drawControlEdit = leafletObjects.drawControlEditPanel;  // edit panel
+  drawControlEdit = leafletObjects.drawControlEditPanel(this.drawnItems);  // edit panel
   circleMarkerOpt = leafletObjects.circleMarkerStyle;     // marker options
   geoResultsOpt = leafletObjects.cityStyle;
 
@@ -133,11 +133,9 @@ export class MapComponent implements OnInit, OnDestroy {
     });
 
     this.map.on('draw:deleted', (e) => {
-      if (this.drawnItems.getLayers().length === 0) {
-        this.setMapDrawMode();
-      }
       this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
+      this.setMapDrawMode();
       this.clearForm();
     });
 
@@ -241,14 +239,14 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   setMapEditMode() {
     this.map.removeControl(this.drawControlFull);
-    this.map.addControl(leafletObjects.drawControlEditPanel(this.drawnItems));
+    this.map.addControl(this.drawControlEdit);
   }
 
   /**
    * Show the "draw" toolbar inside map
    */
   setMapDrawMode() {
-    this.map.removeControl(leafletObjects.drawControlEditPanel(this.drawnItems));
+    this.map.removeControl(this.drawControlEdit);
     this.map.addControl(this.drawControlFull);
   }
 

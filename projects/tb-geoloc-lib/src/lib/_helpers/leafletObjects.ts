@@ -47,7 +47,7 @@ export const drawControlPanel = new L.Control.Draw({
  *
  * @param editedLayer
  */
-export const drawControlEditPanel = function(editedLayer) {
+export function drawControlEditPanel(editedLayer) {
   return new L.Control.Draw({
     position: 'topleft',
     draw: {
@@ -64,7 +64,7 @@ export const drawControlEditPanel = function(editedLayer) {
       remove: {}
     }
   });
-};
+}
 
 /**
  *
