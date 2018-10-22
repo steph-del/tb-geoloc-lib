@@ -11,6 +11,7 @@ import 'leaflet-draw';
 
 import { GeoPoint } from '../_helpers/geoConvert';
 import * as leafletObjects from '../_helpers/leafletObjects';
+import { dmsFormatter } from '../_helpers/dmsTools';
 
 import { GeocodingService } from '../_services/geocoding.service';
 import { ElevationService } from '../_services/elevation.service';
@@ -59,6 +60,8 @@ export class MapComponent implements OnInit, OnDestroy {
   // SUBSCRIPTIONS
   //
   geoSearchSubscription = new Subscription;
+  latDmsInputSubscription = new Subscription;
+  lngDmsInputSubscription = new Subscription;
 
   //
   // LEAFLET VARIABLES AND INITIALIZATION
@@ -215,10 +218,20 @@ export class MapComponent implements OnInit, OnDestroy {
       // Fit map to geolocated photos markers
       this.flyToGeolocatedPhotoItems();
     });
+
+    // Watch lat & lng dms inputs changes and set up the dms formatter
+    this.latDmsInputSubscription = this.latlngFormGroup.controls.dmsLatInput.valueChanges.subscribe(value => {
+      this.latlngFormGroup.controls.dmsLatInput.setValue(dmsFormatter(value), { emitEvent: false});
+    });
+    this.lngDmsInputSubscription = this.latlngFormGroup.controls.dmsLngInput.valueChanges.subscribe(value => {
+      this.latlngFormGroup.controls.dmsLngInput.setValue(dmsFormatter(value), { emitEvent: false});
+    });
   }
 
   ngOnDestroy() {
     this.geoSearchSubscription.unsubscribe();
+    this.latDmsInputSubscription.unsubscribe();
+    this.lngDmsInputSubscription.unsubscribe();
   }
 
   /**
