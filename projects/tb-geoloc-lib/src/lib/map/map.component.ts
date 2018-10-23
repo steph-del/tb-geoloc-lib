@@ -281,7 +281,7 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   flyToDrawnItems() {
     const b = this.drawnItems.getBounds();
-    this.map.flyToBounds(b);
+    this.map.flyToBounds(b, { maxZoom: 14, animate: false });
   }
 
   /**
@@ -289,7 +289,7 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   flyToGeoResultsItems() {
     const b = this.geoResultsLayer.getBounds();
-    this.map.flyToBounds(b);
+    this.map.flyToBounds(b, { maxZoom: 14, animate: false });
   }
 
   /**
@@ -297,7 +297,7 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   flyToGeolocatedPhotoItems() {
     const b = this.geolocatedPhotoLatLngLayer.getBounds();
-    this.map.flyToBounds(b);
+    this.map.flyToBounds(b, { maxZoom: 14, animate: false });
   }
 
   /**
