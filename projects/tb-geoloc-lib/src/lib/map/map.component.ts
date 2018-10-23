@@ -120,7 +120,7 @@ export class MapComponent implements OnInit, OnDestroy {
       // We just draw a new draggableMarker instead
       if (this.drawType === 'marker') {
         const latlng = this.drawnItem._latlng;
-        leafletObjects.draggableMarker(latlng.lat, latlng.lng, () => { this.setInputValues(); }).addTo(this.drawnItems);
+        leafletObjects.draggableMarker(latlng.lat, latlng.lng, (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
       } else {
         this.drawnItems.addLayer(this.drawnItem);
       }
@@ -131,7 +131,7 @@ export class MapComponent implements OnInit, OnDestroy {
         this.setMapEditMode();
       }
       if (this.drawnItems.getLayers().length === 1) {
-        this.setInputValues();
+        this.callGeolocElevationApisUsingLatLngInputsValues();
       }
 
       this.flyToDrawnItems();
@@ -303,7 +303,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * avoidCallingElevationApi === false, httpTasks returns a single value (osmPlace)
    * whereas if avoidCallingElevationApi === true, httpTasks returns an array of 2 values [elevation, osmPlace]
    */
-  setInputValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false): void {
+  callGeolocElevationApisUsingLatLngInputsValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false): void {
 
     this.getLatLngFromDrawnItems();
     this.getLatLngDmsFromDrawnItems();
@@ -439,6 +439,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /**
    *
+   * Call the geoloc API 2 times :
+   *  - first call is for reverse geocoding
+   *  - second call is for geoconding, so the address input (placeInput) is updated
    */
   addressSelectedChanged(event: MatAutocompleteSelectedEvent) {
     const osmPlace = event.option.value;
@@ -468,14 +471,14 @@ export class MapComponent implements OnInit, OnDestroy {
     this.addMarkerFromLatLngCoord();
 
     // Call geoloc and elevation APIs
-    this.setInputValues(false, false);
+    this.callGeolocElevationApisUsingLatLngInputsValues(false, false);
 
   }
 
   /**
    *
    */
-  addMarkerFromDmsCoord(avoidCallingElevationApi = false, avoidCallingGeolocApi = false) {
+  addMarkerFromDmsCoord() {
     // clear drawn items layer
     this.clearDrawnItemsLayer();
 
@@ -483,8 +486,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setMapEditMode();
     // @TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
-    this.setInputValues(avoidCallingElevationApi, avoidCallingGeolocApi);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ }).addTo(this.drawnItems);
 
     // Fly
     this.flyToDrawnItems();
@@ -502,7 +504,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
 
     // Fly
     this.flyToDrawnItems();
@@ -618,7 +620,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.addMarkerFromLatLngCoord();
 
     // call APIs
-    this.setInputValues(true, false);
+    this.callGeolocElevationApisUsingLatLngInputsValues(true, false);
 
     // clear geolocated photos layer
     this.geolocatedPhotoLatLngLayer.clearLayers();
