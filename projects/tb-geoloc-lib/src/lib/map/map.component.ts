@@ -313,6 +313,10 @@ export class MapComponent implements OnInit, OnDestroy {
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ }).addTo(this.drawnItems);
 
+    // Set (decimal) latLng inputs
+    this.latlngFormGroup.controls.latInput.setValue(geopoint.getLatDec(), { emitEvent: false });
+    this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLatDec(), { emitEvent: false });
+
     // Fly
     this.flyToDrawnItems();
   }
@@ -330,6 +334,10 @@ export class MapComponent implements OnInit, OnDestroy {
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
+
+    // Set dmsLatLng inputs
+    this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
+    this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
 
     // Fly
     this.flyToDrawnItems();
