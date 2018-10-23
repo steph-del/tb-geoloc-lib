@@ -4,7 +4,7 @@
  */
 
 export interface LocationModel {
-  geometry: JSON;
+  geometry: any;
   geodatum: string;
   locality: string;
   // inseeCode: string;

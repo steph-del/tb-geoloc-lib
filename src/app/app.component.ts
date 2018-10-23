@@ -8,6 +8,10 @@ import { Component, EventEmitter } from '@angular/core';
 export class AppComponent {
   testLatLngData: EventEmitter<Array<LatLngDMSAltitudePhotoName>> = new EventEmitter();
 
+  public locationChange(data) {
+    console.log(data);
+  }
+
   public emitLatLngData() {
     const data = [
       {

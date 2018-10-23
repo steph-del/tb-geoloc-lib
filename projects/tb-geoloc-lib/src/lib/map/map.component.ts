@@ -71,6 +71,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private map: L.Map;
   public mapLat = 0;
   public mapLng = 0;
+  private drawType: string;
+  private drawnItem: any;
 
   // layers
   private osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
@@ -111,16 +113,16 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.addLayer(this.geolocatedPhotoLatLngLayer);
     this.map.addControl(this.drawControlFull);
     this.map.on('draw:created', (e) => {
-      const layer = e['layer'];
-      const type = e['layerType'];
+      this.drawnItem = e['layer'];
+      this.drawType = e['layerType'];
       // If it's a marker, it must be draggable. By default, leaflet.draw module does not provide a draggable marker
       // So, we don't do a this.drawnItems.addLayer(layer);
       // We just draw a new draggableMarker instead
-      if (type === 'marker') {
-        const latlng = layer._latlng;
+      if (this.drawType === 'marker') {
+        const latlng = this.drawnItem._latlng;
         leafletObjects.draggableMarker(latlng.lat, latlng.lng, () => { this.setInputValues(); }).addTo(this.drawnItems);
       } else {
-        this.drawnItems.addLayer(layer);
+        this.drawnItems.addLayer(this.drawnItem);
       }
 
       // Show / hide control panels
@@ -345,23 +347,17 @@ export class MapComponent implements OnInit, OnDestroy {
       // Set elevation input
       if (!avoidCallingElevationApi) { this.elevationFormGroup.controls.elevationInput.setValue(elevation); }
 
-      // bind _location
-      if (avoidCallingElevationApi) {
-        this.bindLocationOutput([this.elevationFormGroup.controls.elevationInput.value, osmPlace]);
-      } else {
-        this.bindLocationOutput(result);
-      }
-
       // Patch place input value
       if (!avoidCallingGeolocApi) {
         this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace), {emitEvent: false});
       }
 
-      // emit location
-// console.log(this._location);
-
-      // check location integrity
-      this.location.next(this._location);
+      // bind _location & emit location
+      if (avoidCallingElevationApi) {
+        this.bindLocationOutput([this.elevationFormGroup.controls.elevationInput.value, osmPlace]);
+      } else {
+        this.bindLocationOutput(result);
+      }
 
     }, error => {
       // Manage error
@@ -469,8 +465,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this.elevationFormGroup.controls.elevationInput.setValue(osmPlace.elevation, {emitEvent: false});
 
     // Draw a marker at the center of the polygon
-    // + don't call geoLoc API
-    this.addMarkerFromLatLngCoord(false, true);
+    this.addMarkerFromLatLngCoord();
+
+    // Call geoloc and elevation APIs
+    this.setInputValues(false, false);
 
   }
 
@@ -495,7 +493,7 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    *
    */
-  addMarkerFromLatLngCoord(avoidCallingElevationApi = false, avoidCallingGeolocApi = false) {
+  addMarkerFromLatLngCoord() {
     // clear drawn items layer
     this.clearDrawnItemsLayer();
 
@@ -505,7 +503,6 @@ export class MapComponent implements OnInit, OnDestroy {
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
     leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {this.setInputValues(); }).addTo(this.drawnItems);
-    this.setInputValues(avoidCallingElevationApi, avoidCallingGeolocApi);
 
     // Fly
     this.flyToDrawnItems();
@@ -551,12 +548,11 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Bind data from elevation and OSM http results to this._location
    * Perform some verifications to ensure data integrity
-   * @param data data[0] = elevation, data[1] = osm data   |   data = osm data
+   * @param data data[0] = elevation, data[1] = osm data | data = osm data
    */
   bindLocationOutput(data: Array<any> | any): void {
     // if elevation = 0 or null ?
     // if osm data incomplete ?
-
     let elevation: any;
     let osmPlace: any;
     if (Array.isArray(data)) {
@@ -566,28 +562,45 @@ export class MapComponent implements OnInit, OnDestroy {
       elevation = this.elevationFormGroup.controls.elevationInput.value;
       osmPlace = data;
     }
+    this._location.geometry = this.drawnItems.toGeoJSON();
+    // geodatum
+    this._location.elevation = elevation;
+    this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
+    this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
+    // published_location : Précision géographique à laquelle est publiée l'obs, permet de gérer le floutage - Précise, Localité, Maille 10x10km
 
-    this._location.elevation = this._location.elevation ? elevation : null;
-    this._location.geometry = this._location.geometry ? osmPlace.geojson : null;
-    this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform
-    this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform
-    this._location.osmCountry = this._location.osmCountry ? osmPlace.address.country : null;
-    this._location.osmCountryCode = this._location.osmCountryCode ? osmPlace.address.country_code : null;
-    this._location.osmCounty = this._location.osmCounty ? osmPlace.address.county : null;
-    this._location.osmId = this._location.osmId ? osmPlace.osm_id : null;
-    this._location.osmNeighbourhood = this._location.osmNeighbourhood ? null : null;      // not provided by nominatim
-    this._location.osmPlaceId = this._location.osmPlaceId ? osmPlace.place_id : null;
-    this._location.osmPostcode = this._location.osmPostcode ? osmPlace.address.postcode : null;
-    this._location.osmRoad = this._location.osmRoad ? osmPlace.address.road : null;
-    this._location.osmState = this._location.osmState ? osmPlace.address.state : null;
-    this._location.osmSuburb = this._location.osmSuburb ? osmPlace.address.suburb : null;
-    this._location.publishedLocation = this._location.publishedLocation ? null : null;     // perform
-    this._location.station = this._location.station ? null : null;               // perform
+    this._location.osmCountry = osmPlace.address.country;
+    this._location.osmCountryCode = osmPlace.address.country_code;
+    this._location.osmCounty = osmPlace.address.county;
+    this._location.osmPostcode = osmPlace.address.postcode;
+    if (osmPlace.address.city) { this._location.locality = osmPlace.address.city; }
+    if (osmPlace.address.town) { this._location.locality = osmPlace.address.town; }
+    if (osmPlace.address.village) { this._location.locality = osmPlace.address.village; }
+
+    this._location.sublocality = osmPlace.hamlet;
+
+    this._location.osmRoad = osmPlace.address.road;
+    this._location.osmState = osmPlace.address.state;
+    this._location.osmSuburb = osmPlace.address.suburb;
+
+    this._location.osmId = osmPlace.osm_id;
+    this._location.osmNeighbourhood = null;      // not provided by nominatim
+    this._location.osmPlaceId = osmPlace.place_id;
+    this._location.publishedLocation = null;     // perform
+    this._location.station = null;               // perform
 
     // Verifications
+    // @todo
+
+    // Emit
+    this.location.next(this._location);
   }
 
-  test(format: string): void {
+  /**
+   *
+   * @param format
+   */
+  setLatLngInputFormat(format: string): void {
     if (format !== 'decimal' && format !== 'dms') { return; }
     this.coordFormat = format;
   }
@@ -602,7 +615,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this.elevationFormGroup.controls.elevationInput.setValue(elevation);
 
     // add marker
-    this.addMarkerFromLatLngCoord(true);
+    this.addMarkerFromLatLngCoord();
+
+    // call APIs
+    this.setInputValues(true, false);
 
     // clear geolocated photos layer
     this.geolocatedPhotoLatLngLayer.clearLayers();

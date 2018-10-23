@@ -42,8 +42,8 @@
 
         <!-- menu format decimal / dms-->
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="test('dms')">Degrés minutes secondes</button>
-          <button mat-menu-item (click)="test('decimal')">Décimal</button>
+          <button mat-menu-item (click)="setLatLngInputFormat('dms')">Degrés minutes secondes</button>
+          <button mat-menu-item (click)="setLatLngInputFormat('decimal')">Décimal</button>
         </mat-menu>
 
         <!-- latitude / longitude DMS format -->
