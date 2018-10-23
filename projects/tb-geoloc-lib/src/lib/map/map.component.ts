@@ -600,7 +600,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Use to set inputs values, add a marker and call API for a geolocated photo
+   * Set inputs values, add a marker and call API for a geolocated photo
    */
   gpsMarkerSetValues(latDec, lngDec, elevation) {
     // set inputs values
