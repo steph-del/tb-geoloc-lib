@@ -351,8 +351,8 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   callGeolocElevationApisUsingLatLngInputsValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false): void {
 
-    this.getLatLngFromDrawnItems();
-    this.getLatLngDmsFromDrawnItems();
+    this.setLatLngInputFromDrawnItems();
+    this.setLatLngDmsInputFromDrawnItems();
     let httpTasks: Observable<any>;
     let elevation: any;
     let osmPlace: any;
@@ -417,7 +417,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * Should be improved for complex polygons / polylines ?
    * Could use turf.js
    */
-  getLatLngFromDrawnItems(): void {
+  setLatLngInputFromDrawnItems(): void {
     const centroid = this.drawnItems.getBounds().getCenter();
     this.latlngFormGroup.controls.latInput.setValue(centroid.lat);
     this.latlngFormGroup.controls.lngInput.setValue(centroid.lng);
@@ -427,7 +427,7 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    *
    */
-  getLatLngDmsFromDrawnItems(): void {
+  setLatLngDmsInputFromDrawnItems(): void {
     const centroid = this.drawnItems.getBounds().getCenter();
     const geopoint = new GeoPoint(centroid.lng, centroid.lat);
     this.latlngFormGroup.controls.dmsLatInput.patchValue(geopoint.getLatDeg());
