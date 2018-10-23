@@ -19,8 +19,6 @@ import { ElevationService } from '../_services/elevation.service';
 import { LocationModel } from '../_models/location.model';
 import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 
-// import { Draw, control, Control, FeatureGroup, Layer, icon, Icon, IconOptions, latLng, LatLng, Map, marker, point, polyline, tileLayer, TileLayer } from 'leaflet';
-
 @Component({
   selector: 'tb-geoloc-map',
   templateUrl: './map.component.html',
@@ -28,26 +26,26 @@ import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 })
 export class MapComponent implements OnInit, OnDestroy {
 
-  //
+  // --------------
   // INPUT / OUTPUT
-  //
+  // --------------
   @Input() layersToAdd: Array<string> = ['osm'];
   @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
-  //
-  // FORMS & related variables
-  //
+  // -------------------------
+  // FORMS & RELATED VARIABLES
+  // -------------------------
   latlngFormGroup: FormGroup;
   elevationFormGroup: FormGroup;
   geoSearchFormGroup: FormGroup;
   geoSearchResults: Array<any>;
   coordFormat = 'dms';            // 'decimal' | 'dms'
 
-  //
-  // Variables
-  //
+  // ---------
+  // VARIABLES
+  // ---------
   _location = <LocationModel>{};
   geolocatedPhotoLatLngData: Array<LatLngDMSAltitudePhotoName> = [];
   geolocatedPhotoLatLngDisplayedColumnsTable: Array<string> = ['select', 'photoName', 'lat', 'lng', 'altitude'];
@@ -56,25 +54,22 @@ export class MapComponent implements OnInit, OnDestroy {
   isLoadingLongitude = false;
   isLoadingElevation = false;
 
-  //
+  // -------------
   // SUBSCRIPTIONS
-  //
+  // -------------
   geoSearchSubscription = new Subscription;
   latDmsInputSubscription = new Subscription;
   lngDmsInputSubscription = new Subscription;
 
-  //
-  // LEAFLET VARIABLES AND INITIALIZATION
-  //
-
-  // Leaflet variables
+  // ----------------------------------------
+  // LEAFLET VARIABLES, LAYERS AND MAP CONFIG
+  // ----------------------------------------
   private map: L.Map;
   public mapLat = 0;
   public mapLng = 0;
   private drawType: string;
   private drawnItem: any;
 
-  // layers
   private osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
   private googleSatelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
   private googleHybridLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
@@ -101,10 +96,116 @@ export class MapComponent implements OnInit, OnDestroy {
   circleMarkerOpt = leafletObjects.circleMarkerStyle;     // marker options
   geoResultsOpt = leafletObjects.cityStyle;
 
-  //
-  // Code
-  //
 
+
+  // ----
+  // CODE
+  // ----
+
+  constructor(
+    private fb: FormBuilder,
+    private geocodeService: GeocodingService,
+    private elevationService: ElevationService) { }
+
+  /**
+   * - Create the forms
+   * - Set up subscriptions (geo search, geolocated photos, lat / lng inputs)
+   */
+  ngOnInit() {
+    // Create forms
+    this.latlngFormGroup = this.fb.group({
+      latInput: this.fb.control('', [Validators.required, this.latLngDecValidator]),
+      lngInput: this.fb.control('', [Validators.required, this.latLngDecValidator]),
+      dmsLatInput: this.fb.control('', [Validators.required, this.latLngDmsValidator]),
+      dmsLngInput: this.fb.control('', [Validators.required, this.latLngDmsValidator])
+    });
+
+    this.elevationFormGroup = this.fb.group({
+      elevationInput: this.fb.control('', null)
+    });
+
+    this.geoSearchFormGroup = this.fb.group({
+      placeInput: this.fb.control('', null)
+    });
+
+    // Watch placeInput changes
+    this.geoSearchSubscription = this.geoSearchFormGroup.controls.placeInput.valueChanges
+    .pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(value => {
+        this.isLoadingAddress = true;
+        return this.geocodeService.geocode(value);
+      })
+    ).subscribe(results => {
+      this.isLoadingAddress = false;
+      this.geoSearchResults = results;
+    }, (error) => {
+      // @toto manage error
+      this.isLoadingAddress = false;
+    });
+
+    // Watch geolocated photo input changes
+    this.geolocatedPhotoLatLng.subscribe(photoLatLng => {
+      // @todo clear this.geolocatedPhotoLatLngLayer
+
+      this.geolocatedPhotoLatLngData = photoLatLng;
+
+      // For each geolocated photo, add marker and bind mouse event on thoses markers
+      this.geolocatedPhotoLatLngData.forEach(data => {
+        // Get latitude and longitude (geolocated data are in DMS format)
+        const _latDms = data.lat.deg + '° ' + data.lat.min + '\'' + data.lat.sec + '"';
+        const _lngDms = data.lng.deg + '° ' + data.lng.min + '\'' + data.lng.sec + '"';
+        const g = new GeoPoint(_lngDms, _latDms);
+        data.latDec = g.latDec;
+        data.lngDec = g.lonDec;
+
+        // Create the marker
+        const latLng = L.latLng(data.latDec, data.lngDec);
+        const gpsPhotoMarker = new L.Marker(latLng, { icon: leafletObjects.gpsPhotoMarkerIcon() });
+        // Marker popup
+        const html = `
+          <b>Fichier "${data.photoName}"</b><br>
+          Lat. : ${g.latDeg}<br />
+          Lng. : ${g.lonDeg}<br />
+          Alt. : ${data.altitude} m<br /><br />
+          <b>Cliquez sur le point pour utiliser ces coordonnées</b>`;
+        gpsPhotoMarker.bindPopup(html).openPopup();
+        // Marker mouse events
+        gpsPhotoMarker.on('click', (event => { this.gpsMarkerSetValues(data.latDec, data.lngDec, data.altitude); }));
+        gpsPhotoMarker.on('mouseover', (event) => { gpsPhotoMarker.openPopup(); });
+        gpsPhotoMarker.on('mouseout', (event => { gpsPhotoMarker.closePopup(); }));
+        // Add the marker to the map
+        gpsPhotoMarker.addTo(this.geolocatedPhotoLatLngLayer);
+      });
+
+      // Fit map to geolocated photos markers
+      this.flyToGeolocatedPhotoItems();
+    });
+
+    // Watch lat & lng DMS inputs changes and set up the DMS formatter
+    // The DMS formatter restricts the keyboard input of the user : only number, comma, dot and '-', deg and min must be between -90 and +90
+    // The formatter auto fill the ° ' and " characters to help the user input
+    this.latDmsInputSubscription = this.latlngFormGroup.controls.dmsLatInput.valueChanges.subscribe(value => {
+      this.latlngFormGroup.controls.dmsLatInput.setValue(dmsFormatter(value), { emitEvent: false});
+    });
+    this.lngDmsInputSubscription = this.latlngFormGroup.controls.dmsLngInput.valueChanges.subscribe(value => {
+      this.latlngFormGroup.controls.dmsLngInput.setValue(dmsFormatter(value), { emitEvent: false});
+    });
+  }
+
+  /**
+   * Unsubscribe
+   */
+  ngOnDestroy() {
+    this.geoSearchSubscription.unsubscribe();
+    this.latDmsInputSubscription.unsubscribe();
+    this.lngDmsInputSubscription.unsubscribe();
+  }
+
+  /**
+   * Add layers and events listeners
+   */
   onMapReady(map: L.Map) {
     this.map = map;
     this.map.addControl(L.control.layers(null, this.mapLayers, { position: 'topright'}));
@@ -147,99 +248,9 @@ export class MapComponent implements OnInit, OnDestroy {
     this.redrawMap(100);
   }
 
-
-  constructor(
-    private fb: FormBuilder,
-    private geocodeService: GeocodingService,
-    private elevationService: ElevationService) { }
-
-  ngOnInit() {
-    // Create forms
-    this.latlngFormGroup = this.fb.group({
-      latInput: this.fb.control('', [Validators.required, this.latLngDecValidator]),
-      lngInput: this.fb.control('', [Validators.required, this.latLngDecValidator]),
-      dmsLatInput: this.fb.control('', [Validators.required, this.latLngDmsValidator]),
-      dmsLngInput: this.fb.control('', [Validators.required, this.latLngDmsValidator])
-    });
-
-    this.elevationFormGroup = this.fb.group({
-      elevationInput: this.fb.control('', null)
-    });
-
-    this.geoSearchFormGroup = this.fb.group({
-      placeInput: this.fb.control('', null)
-    });
-
-    // Watch placeInput changes
-    this.geoSearchSubscription = this.geoSearchFormGroup.controls.placeInput.valueChanges
-    .pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(value => {
-        this.isLoadingAddress = true;
-        return this.geocodeService.geocode(value);
-      })
-    ).subscribe(results => {
-      this.isLoadingAddress = false;
-      this.geoSearchResults = results;
-    }, (error) => {
-      // @toto manage error
-      this.isLoadingAddress = false;
-    });
-
-    // Watch geolocated photo input changes
-    this.geolocatedPhotoLatLng.subscribe(photoLatLng => {
-      // @todo clear this.geolocatedPhotoLatLngLayer
-
-      this.geolocatedPhotoLatLngData = photoLatLng;
-
-      // Description needed
-      this.geolocatedPhotoLatLngData.forEach(data => {
-        const _latDms = data.lat.deg + '° ' + data.lat.min + '\'' + data.lat.sec + '"';
-        const _lngDms = data.lng.deg + '° ' + data.lng.min + '\'' + data.lng.sec + '"';
-        const g = new GeoPoint(_lngDms, _latDms);
-        data.latDec = g.latDec;
-        data.lngDec = g.lonDec;
-
-        // CREATE GEOJSON
-        const latLng = L.latLng(data.latDec, data.lngDec);
-        const gpsPhotoMarker = new L.Marker(latLng, { icon: leafletObjects.gpsPhotoMarkerIcon() });
-        const html = `
-          <b>Fichier "${data.photoName}"</b><br>
-          Lat. : ${g.latDeg}<br />
-          Lng. : ${g.lonDeg}<br />
-          Alt. : ${data.altitude} m<br /><br />
-          <b>Cliquez sur le point pour utiliser ces coordonnées</b>`;
-        gpsPhotoMarker.bindPopup(html).openPopup();
-        gpsPhotoMarker.on('click', (event => { this.gpsMarkerSetValues(data.latDec, data.lngDec, data.altitude); }));
-        gpsPhotoMarker.on('mouseover', (event) => { gpsPhotoMarker.openPopup(); });
-        gpsPhotoMarker.on('mouseout', (event => { gpsPhotoMarker.closePopup(); }));
-        gpsPhotoMarker.addTo(this.geolocatedPhotoLatLngLayer);
-      });
-
-      // Fit map to geolocated photos markers
-      this.flyToGeolocatedPhotoItems();
-    });
-
-    // Watch lat & lng dms inputs changes and set up the dms formatter
-    this.latDmsInputSubscription = this.latlngFormGroup.controls.dmsLatInput.valueChanges.subscribe(value => {
-      this.latlngFormGroup.controls.dmsLatInput.setValue(dmsFormatter(value), { emitEvent: false});
-    });
-    this.lngDmsInputSubscription = this.latlngFormGroup.controls.dmsLngInput.valueChanges.subscribe(value => {
-      this.latlngFormGroup.controls.dmsLngInput.setValue(dmsFormatter(value), { emitEvent: false});
-    });
-  }
-
-  ngOnDestroy() {
-    this.geoSearchSubscription.unsubscribe();
-    this.latDmsInputSubscription.unsubscribe();
-    this.lngDmsInputSubscription.unsubscribe();
-  }
-
   /**
    * When the map parent's div size change (eg. panel width), have to redraw the map
    * Sometimes (when opening / closing a tab), size change is detected too earlier, need to set a delay (about 10-100ms seems to be convenient)
-   * @param delay
    */
   redrawMap(delay?: number) {
     if (delay) {
@@ -266,7 +277,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
+   * Set map bounds to drawn items
    */
   flyToDrawnItems() {
     const b = this.drawnItems.getBounds();
@@ -274,7 +285,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
+   * Set map bounds to geo reults items
    */
   flyToGeoResultsItems() {
     const b = this.geoResultsLayer.getBounds();
@@ -282,11 +293,46 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
+   * Set map bounds to geolocated photos items
    */
   flyToGeolocatedPhotoItems() {
     const b = this.geolocatedPhotoLatLngLayer.getBounds();
     this.map.flyToBounds(b);
+  }
+
+  /**
+   * Draw a marker on drawItems featureGroup with DMS input values
+   */
+  addMarkerFromDmsCoord() {
+    // clear drawn items layer
+    this.clearDrawnItemsLayer();
+
+    // update map toolbar
+    this.setMapEditMode();
+    // @TODO check latitude and longitude values (format + limits)
+    const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ }).addTo(this.drawnItems);
+
+    // Fly
+    this.flyToDrawnItems();
+  }
+
+  /**
+   * Draw a marker on drawItems featureGroup with decimal input values
+   */
+  addMarkerFromLatLngCoord() {
+    // clear drawn items layer
+    this.clearDrawnItemsLayer();
+
+    // update map toolbar
+    this.setMapEditMode();
+
+    // TODO check latitude and longitude values (format + limits)
+    const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
+
+    // Fly
+    this.flyToDrawnItems();
   }
 
   /**
@@ -396,48 +442,30 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
-   * @param lat
-   * @param long
+   * Reverse geocoding from lat / lng inputs values
    */
   reverseGeocodingFromInputValue(): Observable<any> {
     return this.geocodeService.reverse(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value);
   }
 
   /**
-   * Check geo coordinates format
+   * Latitude / longitude DMS form Validator
    */
-  latitudeValidator(control: FormControl) {
-    if (control.value === null) { return null; }
-
-    // DMS format
-    // latitude overflow ?
-    if (control.value.match(`^(\-)?[0-9]{1,2}° [0-9]{1,2}\' [0-9]{1,2}(\.[0-9]{1,2})?\"`)) { return null; }
-
-    // latitude format
-    if (control.value.match(`^(\-)?([9][1-9](\.[0-9]*)?)|([9][0].[0-9]*)`)) { return { latitudeValueOverflow: true }; }
-    if (control.value.match(`^(\-)?[0-9]{1-2}\.[0-9]*`)) { return null; }
-
-    if (control.touched && control.dirty) { return { wrongFormat: true }; } else { return null; }
+  latLngDmsValidator(control: FormControl) {
+    const regexp = new RegExp('^(\\-)?[0-9]{1,2}\\° [0-9]{1,2}\\\' [0-9]{1,2}\\.[0-9]{1,12}\\"');
+    return regexp.test(control.value) ? null : { malformedLatLngDmsFormat: true };
   }
 
   /**
-   *
-   * @param control
+   * Latitude / longitude decimal form validator
    */
-  longitudeValidator(control: FormControl) {
-    if (control.value === null) { return null; }
-
-    // DMS format
-    // longitude overflow ?
-    if (control.value.match(`^(\-)?[0-9]{1,2}° [0-9]{1,2}\' [0-9]{1,2}(\.[0-9]{1,2})?\"`)) { return null; }
-
-    // latitude / longitude format
-    if (control.value.match(`^(\-)?(([1][9][1-9](\.?[0-9]*))|([1][9][0]\.[0-9]*)|([0-9]{4,99}(\.[0-9]*)?))`)) { return { longitudeValueOverflow: true }; }
-    if (control.value.match(`^(\-)?[0-9][0-9]?[0-9]?(\.)?[0-9]*`)) { return null; }
+  latLngDecValidator(control: FormControl) {
+    const regexp = new RegExp('^(\\-)?[0-9]{1,2}\\.[0-9]{1,20}');
+    return regexp.test(control.value) ? null : { malformedLatLngDecFormat: true };
   }
 
   /**
+   * When user select an address within the autocomplete results list
    *
    * Call the geoloc API 2 times :
    *  - first call is for reverse geocoding
@@ -450,7 +478,7 @@ export class MapComponent implements OnInit, OnDestroy {
     const northEast = new L.LatLng(osmPlace.boundingbox[1], osmPlace.boundingbox[3]);
     this.map.fitBounds(L.latLngBounds(southWest, northEast));
 
-    // Add geojson to the map
+    // Add geojson to the map (if user enter a city, draw the administrative shape on the map)
     this.clearGeoResultsLayer();
     this.geoResultsLayer.addData(osmPlace.geojson);
 
@@ -473,41 +501,6 @@ export class MapComponent implements OnInit, OnDestroy {
     // Call geoloc and elevation APIs
     this.callGeolocElevationApisUsingLatLngInputsValues(false, false);
 
-  }
-
-  /**
-   *
-   */
-  addMarkerFromDmsCoord() {
-    // clear drawn items layer
-    this.clearDrawnItemsLayer();
-
-    // update map toolbar
-    this.setMapEditMode();
-    // @TODO check latitude and longitude values (format + limits)
-    const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ }).addTo(this.drawnItems);
-
-    // Fly
-    this.flyToDrawnItems();
-  }
-
-  /**
-   *
-   */
-  addMarkerFromLatLngCoord() {
-    // clear drawn items layer
-    this.clearDrawnItemsLayer();
-
-    // update map toolbar
-    this.setMapEditMode();
-
-    // TODO check latitude and longitude values (format + limits)
-    const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
-
-    // Fly
-    this.flyToDrawnItems();
   }
 
   /**
@@ -599,8 +592,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
-   * @param format
+   * Change the form coordinates format : 'decimal' or 'dms'
    */
   setLatLngInputFormat(format: string): void {
     if (format !== 'decimal' && format !== 'dms') { return; }
@@ -608,7 +600,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
+   * Use to set inputs values, add a marker and call API for a geolocated photo
    */
   gpsMarkerSetValues(latDec, lngDec, elevation) {
     // set inputs values
@@ -628,21 +620,5 @@ export class MapComponent implements OnInit, OnDestroy {
 
   latLngDmsAutoFormatter(value): string {
     return '';
-  }
-
-  /**
-   * Latitude / longitude DMS format check
-   */
-  latLngDmsValidator(control: FormControl) {
-    const regexp = new RegExp('^(\\-)?[0-9]{1,2}\\° [0-9]{1,2}\\\' [0-9]{1,2}\\.[0-9]{1,12}\\"');
-    return regexp.test(control.value) ? null : { malformedLatLngDmsFormat: true };
-  }
-
-  /**
-   * Latitude / longitude decimal format check
-   */
-  latLngDecValidator(control: FormControl) {
-    const regexp = new RegExp('^(\\-)?[0-9]{1,2}\\.[0-9]{1,20}');
-    return regexp.test(control.value) ? null : { malformedLatLngDecFormat: true };
   }
 }
