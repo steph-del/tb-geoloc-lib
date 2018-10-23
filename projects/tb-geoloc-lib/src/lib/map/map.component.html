@@ -34,7 +34,7 @@
               <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
             </mat-form-field>
             
-            <button mat-icon-button (click)="addMarkerFromLatLngCoord()" color="primary">
+            <button mat-icon-button (click)="addMarkerFromLatLngCoord(); callGeolocElevationApisUsingLatLngInputsValues();" color="primary">
               <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
             </button>
           </div>
@@ -67,7 +67,7 @@
             <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
           </mat-form-field>
 
-          <button mat-icon-button (click)="addMarkerFromDmsCoord()" color="primary">
+          <button mat-icon-button (click)="addMarkerFromDmsCoord(); callGeolocElevationApisUsingLatLngInputsValues();" color="primary">
             <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
           </button>
         </div>
