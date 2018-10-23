@@ -78,7 +78,7 @@
         <mat-form-field style="width: 100px;">
           <input matInput formControlName="elevationInput" placeholder="altitude">
           <mat-spinner *ngIf="isLoadingElevation" diameter="20" matSuffix></mat-spinner>
-          <span matSuffix>m</span>
+          <span *ngIf="!isLoadingElevation" matSuffix>m</span>
         </mat-form-field>
       </div>
     </div>
