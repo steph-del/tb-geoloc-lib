@@ -221,7 +221,7 @@ export class MapComponent implements OnInit, OnDestroy {
       // We just draw a new draggableMarker instead
       if (this.drawType === 'marker') {
         const latlng = this.drawnItem._latlng;
-        leafletObjects.draggableMarker(latlng.lat, latlng.lng, (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
+        leafletObjects.draggableMarker(latlng.lat, latlng.lng, (dragEnd) => { this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
       } else {
         this.drawnItems.addLayer(this.drawnItem);
       }
