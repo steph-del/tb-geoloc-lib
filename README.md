@@ -1,41 +1,87 @@
 # TbGeolocLibApp
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.8.
+Le projet est composée de 3 applications :
 
-## Installation
+- **tb-tsb-lib** : la librairie
+- **tb-tsb-lib-app** : l'application qui fait tourner la librairie (test)
+- **tb-tsb-lib-app-e2e** : les tests e2e (généré automatiquement par Angular)
 
-- Importer les styles de leaflet dans votre main.css : `@import "~leaflet/dist/leaflet.css";`
-- [Ajouter le chemin du fichier de styles dans angular CLI](https://github.com/Asymmetrik/ngx-leaflet/tree/8a3056c4d78c4012fd5a541315317a3b286311d2#adding-styles-in-angular-cli)
-- Importer LeafletModule.forRoot() dans l'appli principale.
-- Ajoute les fichiers des icones leaflet directement dans /assets/img/map (compléter doc)
-- ... COMPLETER AVEC LEAFLET-DRAW (css...)
+Voir le fichier [**angular.json**](https://github.com/steph-del/tb-geoloc-lib/blob/master/angular.json) à la racine du projet.
 
-## Development server
+La librairie fonctionne de concert avec Nomiatim
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Utilisation du composant `<tb-geoloc-map>`
 
-## Code scaffolding
+Exemple d'utilisation :
+[**Application test**](https://github.com/steph-del/tb-geoloc-lib/tree/master/src/app)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Paramètres en entrée @Input
+
+Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insérer la balise `<tb-geoloc-map></tb-geoloc-map>`, ça fonctionne.
+
+
+| Paramètre                 | Requis | Type     | Valeurs | Valeur par défaut | Description |
+| ---                       | ---    | ---      | ---     | ---               | ---         |
+| layersToAdd               |        | Array<string>   | ['osm', 'brgm', ...] | ['osm'] | non encore implémenté |
+| geolocatedPhotoLatLng     |        | un Observable contenant un tableau de `LatLngDMSAltitudePhotoName` | voir le type | - | cet @Input est soumis à souscription. Les photos géolocalisées sont alors utilisables dans le composant. Fonctionne de concert avec le module `tb-dropbox-lib` |
+
+LatLngDMSAltitudePhotoName (model) :
+
+| Propriété   | Type                                    | Commentaire |
+| ---         | ---                                     | ---         |
+| lat         | {deg: number, min: number, sec: number} | les données de localisation des appareils photos sont fournies au format DMS |
+| lng         | {deg: number, min: number, sec: number} | idem
+| altitude    | number                                  |
+| photoName   | string                                  | nom du fichier (affiché dans l'infobulle du point de localisation sur la carte |
+| latDms      | string                                  | optionnel, si déjà calculé
+| lngDms      | string                                  | optionnel, si déjà calculé
+| latDec      | number                                  | optionnel, si déjà calculé   |
+| lngDec      | numbe                                   | optionnel, si déjà calculé   |
+
+### Paramètres en sortie @Output
+
+| Propriété          | Valeur(s)     | Commentaire |
+| ---                | ---           | ---         |
+| location           | LocationModel | informations nécessaires à l'enregistrement de la localité en bdd |
+
+LocationModel :
+
+| Propriété           | Type                             | Commentaire |
+| ---                 | ---                              | ---         |
+| geometry            | geoJson                          | geoJson de l'entité (point, polyligne ou polygone)
+| geodatum            | string                           | 
+| locality            | string                           |
+| elevation           | number                           |
+| publishedLocation   | 'précise' | 'localité' | '10x10' | 
+| locationAccuracy    | number                           | 
+| station             | string                           |
+| sublocality         | string                           |
+| localityConsistency | boolean                          |
+| osmState            | string                           | les données 'osm' sont fournies par Nominatim
+| osmCountry          | string                           |
+| osmCountryCode      | string                           |
+| osmCounty           | string                           |
+| osmPostCode         | string                           |
+| osmRoad             | string                           |
+| osmNeighbourhood    | string                           | 
+| osmSuburb           | string                           | 
+| osmId               | number                           | 
+| osmPlaceId          | number                           | 
+
+## Serveur de développement
+
+Ne pas oublier de reconstruire la librairie avant de servir l'application (`npm run build_serve` fait les deux à la suite).
 
 ## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+-  `npm run build_lib` pour construire la librairie
+-  `npm run build_serve` pour construire la librairie et servir l'application principale
+-  `npm run build_pack` for construire et packager la librairie
 
 
+> The --prod meta-flag compiles with AOT by default.
 
 
+Le build et la package sont dans le répertoire `dist/`.
 
--- Fonctionne de concert avec Nominatim !!!
+## Tests unitaires
+...
