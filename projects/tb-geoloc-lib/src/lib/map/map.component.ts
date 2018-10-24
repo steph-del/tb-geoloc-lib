@@ -1,5 +1,13 @@
 /**
  * @todo limit polygon area / polyline lenght
+ * @todo fix form input not updated after .setValue (except for the gpsMarkerSetValues method)
+ * see : https://github.com/angular/material2/issues/7601#issuecomment-334947280,
+ *       https://github.com/angular/material2/issues/2434,
+ *       https://github.com/angular/material2/issues/2363,
+ *       https://github.com/angular/material2/pull/2455,
+ *       https://github.com/angular/material2/issues/2837#issuecomment-276538616,
+ *       https://github.com/angular/material2/issues/7601,
+ *       https://github.com/angular/material2/issues/2441
  */
 import { Component, OnInit, OnDestroy, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -429,7 +437,6 @@ export class MapComponent implements OnInit, OnDestroy {
     const centroid = this.drawnItems.getBounds().getCenter();
     this.latlngFormGroup.controls.latInput.setValue(centroid.lat);
     this.latlngFormGroup.controls.lngInput.setValue(centroid.lng);
-    // https://github.com/angular/material2/issues/7601#issuecomment-334947280
   }
 
   /**
