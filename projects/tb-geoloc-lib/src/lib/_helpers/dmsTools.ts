@@ -5,7 +5,7 @@
  * + avoid enter non numeric (or . ,) characters
  * + force entire numbers for degrees and minutes
  */
-export function dmsFormatter(dmsStr: String): String {
+export function dmsFormatter(dmsStr: string): string {
   try {
     // replace multiples spaces
     dmsStr = dmsStr.replace(/\s\s+/g, ' ');
