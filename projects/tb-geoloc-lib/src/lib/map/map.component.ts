@@ -337,7 +337,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Set dmsLatLng inputs
     this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
-    this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
+    this.latlngFormGroup.controls.dmsLngInput.setValue(geopoint.getLonDeg(), { emitEvent: false });
 
     // Fly
     this.flyToDrawnItems();
