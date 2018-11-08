@@ -63,7 +63,7 @@ export class GeocodingService {
     if (road && neighbourhood && subLocality && locality) {
       return road + ' (' + neighbourhood + ') ' + subLocality + ' ' + locality;
     } else if (road && !neighbourhood && subLocality && locality) {
-      return road + subLocality + ' ' + locality;
+      return road + ' ' + subLocality + ' ' + locality;
     } else if (!road && neighbourhood && subLocality && locality) {
       return neighbourhood + ' ' + subLocality + ' ' + locality;
     } else if (!road && !neighbourhood && subLocality && locality) {
