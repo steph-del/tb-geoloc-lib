@@ -25,6 +25,7 @@ import { GeocodingService } from '../_services/geocoding.service';
 import { ElevationService } from '../_services/elevation.service';
 
 import { LocationModel } from '../_models/location.model';
+import { NominatimObject } from '../_models/nominatimObj.model';
 import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 
 @Component({
@@ -39,6 +40,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // --------------
   @Input() layersToAdd: Array<string> = ['osm'];
   @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
+  @Input() osmClassFilter: Array<string> = [];
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -48,7 +50,7 @@ export class MapComponent implements OnInit, OnDestroy {
   latlngFormGroup: FormGroup;
   elevationFormGroup: FormGroup;
   geoSearchFormGroup: FormGroup;
-  geoSearchResults: Array<any>;
+  geoSearchResults: Array<NominatimObject>;
   coordFormat = 'dms';            // 'decimal' | 'dms'
 
   // ---------
@@ -147,7 +149,14 @@ export class MapComponent implements OnInit, OnDestroy {
       })
     ).subscribe(results => {
       this.isLoadingAddress = false;
-      this.geoSearchResults = results;
+      // filter results if needed
+      if (this.osmClassFilter.length > 0) {
+        this.geocodeService.osmClassFilter(this.osmClassFilter, results).subscribe(filteredResults => {
+          this.geoSearchResults = filteredResults;
+        });
+      } else {
+        this.geoSearchResults = results;
+      }
     }, (error) => {
       // @toto manage error
       this.isLoadingAddress = false;

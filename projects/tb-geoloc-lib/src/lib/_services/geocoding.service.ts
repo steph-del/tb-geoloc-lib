@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, empty } from 'rxjs';
+import { Observable, empty, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NominatimObject } from '../_models/nominatimObj.model';
 import { OsmPlaceModel } from '../_models/osmPlace.model';
@@ -76,6 +76,35 @@ export class GeocodingService {
 
   }
 
+  osmClassFilter(osmClassFilter: Array<string>, osmResults: Array<NominatimObject>) {
+    const osmFilteredResults: Array<NominatimObject> = [];
+    if (osmClassFilter.length > 0 && osmResults.length > 0) {
+      osmResults.forEach(osmItem => {
+        let filterMatchOccurence = 0;
+        let removeOccurence   = false;
+        osmClassFilter.forEach(osmFilterItem => {
+          const _class = osmFilterItem.split(':')[0];
+          const _type = osmFilterItem.split(':')[1];
+          if (_type === '*') {
+            if (osmItem.class === _class) { filterMatchOccurence++; }
+          } else {
+            // if !, remove
+            if (_type.substr(0, 1) === '!') {
+              if (osmItem.class === _class && '!' + osmItem.type === _type) { removeOccurence = true; }
+            } else {
+              if (osmItem.class === _class && osmItem.type === _type) { filterMatchOccurence++; }
+            }
+          }
+        });
+        if (filterMatchOccurence > 0 || !removeOccurence) {
+          osmFilteredResults.push(osmItem);
+        }
+      });
+      return of(osmFilteredResults);
+    } else {
+      return of(osmResults);
+    }
+  }
 }
 
 
