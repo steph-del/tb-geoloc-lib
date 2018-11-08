@@ -96,7 +96,7 @@ export class GeocodingService {
             }
           }
         });
-        if (filterMatchOccurence > 0 || !removeOccurence) {
+        if (filterMatchOccurence > 0 && !removeOccurence) {
           osmFilteredResults.push(osmItem);
         }
       });
