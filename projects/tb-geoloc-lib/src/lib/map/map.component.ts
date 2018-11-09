@@ -43,6 +43,9 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
   @Input() osmClassFilter: Array<string> = [];
   @Input() allowEditDrawnItems = false;
+  @Input() marker = true;
+  @Input() polyline = true;
+  @Input() polygon = true;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -103,10 +106,11 @@ export class MapComponent implements OnInit, OnDestroy {
 
   // Leaflet map configuration
   drawnItems: L.FeatureGroup = new L.FeatureGroup();  // all drawn items
-  drawControlFull: L.Control.Draw = leafletObjects.drawControlPanel;      // draw panel
-  drawControlEdit: L.Control.Draw = leafletObjects.drawControlEditPanel(this.drawnItems, this.allowEditDrawnItems);  // edit panel
   circleMarkerOpt: any = leafletObjects.circleMarkerStyle;     // marker options
   geoResultsOpt: any = leafletObjects.cityStyle;
+  // controls below are set inside onInit() function
+  drawControlFull: L.Control.Draw;  // draw panel
+  drawControlEdit: L.Control.Draw;  // edit panel
 
 
 
@@ -202,8 +206,10 @@ export class MapComponent implements OnInit, OnDestroy {
       this.flyToGeolocatedPhotoItems();
     });
 
-    // drawControlEdit is already set but this.allowEditDrawnItems is not set until onInit is call, so... 2nd call here
+    // this.allowEditDrawnItems, this.marker, this.polyline & this.polygon are not set until onInit is call
+    // for other draw controls, see code above
     this.drawControlEdit = leafletObjects.drawControlEditPanel(this.drawnItems, this.allowEditDrawnItems);
+    this.drawControlFull = leafletObjects.drawControlPanel(this.marker, this.polyline, this.polygon);      // draw panel
 
     // Watch lat & lng DMS inputs changes and set up the DMS formatter
     // The DMS formatter restricts the keyboard input of the user : only number, comma, dot and '-', deg and min must be between -90 and +90

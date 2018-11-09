@@ -31,17 +31,19 @@ export const simpleIconMarker = function(): L.Icon {
 /**
  *
  */
-export const drawControlPanel = new L.Control.Draw({
-  position: 'topleft',
-  draw: {
-    marker: { icon: simpleIconMarker() },
-    polyline: {},
-    polygon: { showArea: true, metric: false },
-    rectangle: false,
-    circle: false,
-    circlemarker: false
-  }
-});
+export function drawControlPanel(_marker: boolean, _polyline: boolean, _polygon: boolean) {
+  return new L.Control.Draw({
+    position: 'topleft',
+    draw: {
+      marker: _marker ? { icon: simpleIconMarker() } : false,
+      polyline: _polyline ? {} : false,
+      polygon: _polygon ? { showArea: true, metric: false } : false,
+      rectangle: false,
+      circle: false,
+      circlemarker: false
+    }
+  });
+}
 
 /**
  *
