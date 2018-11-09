@@ -105,6 +105,15 @@ export class GeocodingService {
       return of(osmResults);
     }
   }
+
+  reverseCorrdinatesArray(coordinatesArray: Array<[number, number]>) {
+    if (coordinatesArray.length > 0) {
+      coordinatesArray.forEach(item => {
+        item.reverse();
+      });
+      return coordinatesArray;
+    }
+  }
 }
 
 

@@ -16,6 +16,7 @@ import { Subscription, Observable, zip } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import * as L from 'leaflet';
 import 'leaflet-draw';
+import { LatLngExpression } from 'leaflet';
 
 import { GeoPoint } from '../_helpers/geoConvert';
 import * as leafletObjects from '../_helpers/leafletObjects';
@@ -296,9 +297,9 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Set map bounds to drawn items
    */
-  flyToDrawnItems() {
+  flyToDrawnItems(_maxZoom = 14) {
     const b = this.drawnItems.getBounds();
-    this.map.flyToBounds(b, { maxZoom: 14, animate: false });
+    this.map.flyToBounds(b, { maxZoom: _maxZoom, animate: false });
   }
 
   /**
@@ -358,6 +359,24 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Fly
     this.flyToDrawnItems();
+  }
+
+  /**
+  *
+  */
+  addPolyline(coordinates: LatLngExpression[]) {
+    // clear drawn items layer
+    this.clearDrawnItemsLayer();
+
+    // update map toolbar
+    this.setMapEditMode();
+
+    // draw
+    const polyline = L.polyline(coordinates);
+    polyline.addTo(this.drawnItems);
+
+    // fly with max zoom
+    this.flyToDrawnItems(18);
   }
 
   /**
@@ -519,8 +538,14 @@ export class MapComponent implements OnInit, OnDestroy {
     this.latlngFormGroup.controls.dmsLngInput.setValue(g.getLonDeg(), {emitEvent: false});
     this.elevationFormGroup.controls.elevationInput.setValue(osmPlace.elevation, {emitEvent: false});
 
-    // Draw a marker at the center of the polygon
-    this.addMarkerFromLatLngCoord();
+    // Draw a polyline or place a marker at the center of a polygon
+    if (osmPlace.geojson.type === 'LineString') {
+      // osm geojson coordinates is like [[long, lat], [long, lat], ...]
+      // but leaflet needs [[lat, long], [lat, long], ...] format !
+      this.addPolyline(this.geocodeService.reverseCorrdinatesArray(osmPlace.geojson.coordinates) as LatLngExpression[]);
+    } else {
+      this.addMarkerFromLatLngCoord();
+    }
 
     // Call geoloc and elevation APIs
     this.callGeolocElevationApisUsingLatLngInputsValues(false, false);
