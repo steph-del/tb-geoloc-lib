@@ -86,20 +86,16 @@ export class MapComponent implements OnInit, OnDestroy {
   private drawnItem: any;
 
   private osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
-  private googleSatelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
+  // private googleSatelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
   private googleHybridLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
   private brgmLayer = L.tileLayer.wms('http://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
-  private mapLayers = {
-    'Google': this.googleHybridLayer,
-    'OSM': this.osmLayer,
-    'BRGM': this.brgmLayer
-  };
+  private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
   private geoResultsLayer = L.geoJSON(null, {style: function() { return { color: '#ff7800', weight: 5, opacity: 0.65 }; }});
   private geolocatedPhotoLatLngLayer = L.geoJSON();
 
   // map options
-  options = {
-    layers: [ this.osmLayer ],
+  mapOptions = {
+    layers: [],
     zoom: 4,
     center: L.latLng({ lat: 46.55886030311719, lng: 2.9882812500000004 })
   };
@@ -210,6 +206,24 @@ export class MapComponent implements OnInit, OnDestroy {
     // for other draw controls, see code above
     this.drawControlEdit = leafletObjects.drawControlEditPanel(this.drawnItems, this.allowEditDrawnItems);
     this.drawControlFull = leafletObjects.drawControlPanel(this.marker, this.polyline, this.polygon);      // draw panel
+
+    // Add map layers
+    if (this.layersToAdd.indexOf('osm') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
+    if (this.layersToAdd.indexOf('google hybrid') !== -1) { this.mapLayers['Google hybride'] = this.googleHybridLayer; }
+    if (this.layersToAdd.indexOf('brgm') !== -1) { this.mapLayers['BRGM'] = this.brgmLayer; }
+
+    // First layer added is shown
+    switch (this.layersToAdd[0]) {
+      case 'osm':
+        this.mapOptions.layers.push(this.osmLayer);
+        break;
+      case 'google hybrid':
+        this.mapOptions.layers.push(this.googleHybridLayer);
+        break;
+      case 'brgm':
+        this.mapOptions.layers.push(this.brgmLayer);
+        break;
+    }
 
     // Watch lat & lng DMS inputs changes and set up the DMS formatter
     // The DMS formatter restricts the keyboard input of the user : only number, comma, dot and '-', deg and min must be between -90 and +90
