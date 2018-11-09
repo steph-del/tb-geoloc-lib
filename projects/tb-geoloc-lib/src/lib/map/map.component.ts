@@ -256,6 +256,19 @@ export class MapComponent implements OnInit, OnDestroy {
       this.flyToDrawnItems();
     });
 
+    this.map.on('draw:edited', (e) => {
+      this.drawnItem = e['layer'];
+      this.drawType = e['layerType'];
+
+//      this.drawnItems.addLayer(this.drawnItem);
+
+      if (this.drawnItems.getLayers().length === 1) {
+        this.callGeolocElevationApisUsingLatLngInputsValues();
+      }
+
+      this.flyToDrawnItems();
+    });
+
     this.map.on('draw:deleted', (e) => {
       this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
@@ -542,7 +555,11 @@ export class MapComponent implements OnInit, OnDestroy {
     if (osmPlace.geojson.type === 'LineString') {
       // osm geojson coordinates is like [[long, lat], [long, lat], ...]
       // but leaflet needs [[lat, long], [lat, long], ...] format !
-      this.addPolyline(this.geocodeService.reverseCorrdinatesArray(osmPlace.geojson.coordinates) as LatLngExpression[]);
+      this.geocodeService.simplifyPolyline(osmPlace.geojson.coordinates);
+      this.addPolyline(this.geocodeService.reverseCorrdinatesArray(
+        this.geocodeService.simplifyPolyline(osmPlace.geojson.coordinates)) as LatLngExpression[]
+      );
+      this.clearGeoResultsLayer();
     } else {
       this.addMarkerFromLatLngCoord();
     }
