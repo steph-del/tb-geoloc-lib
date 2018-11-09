@@ -60,7 +60,7 @@ export function drawControlEditPanel(editedLayer) {
     },
     edit: {
       featureGroup: editedLayer, // this panel id editing editedLayer
-      edit: false,
+      edit: {},
       remove: {}
     }
   });
