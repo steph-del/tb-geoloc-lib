@@ -114,6 +114,16 @@ export class GeocodingService {
       return coordinatesArray;
     }
   }
+
+  simplifyPolyline(coordinatesArray: Array<[number, number]>): Array<[number, number]> {
+    if (coordinatesArray.length > 1) {
+      const firstCoordinate = coordinatesArray[0];
+      const lastCoordinate = coordinatesArray[coordinatesArray.length - 1];
+      return [firstCoordinate, lastCoordinate];
+    } else {
+      return coordinatesArray;
+    }
+  }
 }
 
 
