@@ -47,8 +47,9 @@ export const drawControlPanel = new L.Control.Draw({
  *
  * @param editedLayer
  */
-export function drawControlEditPanel(editedLayer) {
-  return new L.Control.Draw({
+export function drawControlEditPanel(editedLayer, allowEditDrawnItems: boolean) {
+  const editOpt: any = allowEditDrawnItems === true ? {} : false;
+  const dcep = new L.Control.Draw({
     position: 'topleft',
     draw: {
       marker: false,
@@ -60,10 +61,11 @@ export function drawControlEditPanel(editedLayer) {
     },
     edit: {
       featureGroup: editedLayer, // this panel id editing editedLayer
-      edit: {},
+      edit: editOpt,
       remove: {}
     }
   });
+  return dcep;
 }
 
 /**
