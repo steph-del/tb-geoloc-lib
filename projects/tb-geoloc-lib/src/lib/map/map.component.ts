@@ -39,7 +39,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // --------------
   // INPUT / OUTPUT
   // --------------
-  @Input() layersToAdd: Array<string> = ['osm'];
+  @Input() layersToAdd: Array<string> = ['opentopomap'];
   @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
   @Input() osmClassFilter: Array<string> = [];
   @Input() allowEditDrawnItems = false;
@@ -86,7 +86,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private drawnItem: any;
 
   private osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
-  // private googleSatelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
+  private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'OpenTopoMap'});
   private googleHybridLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
   private brgmLayer = L.tileLayer.wms('http://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
   private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
@@ -209,6 +209,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Add map layers
     if (this.layersToAdd.indexOf('osm') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
+    if (this.layersToAdd.indexOf('opentopomap') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
     if (this.layersToAdd.indexOf('google hybrid') !== -1) { this.mapLayers['Google hybride'] = this.googleHybridLayer; }
     if (this.layersToAdd.indexOf('brgm') !== -1) { this.mapLayers['BRGM'] = this.brgmLayer; }
 
@@ -216,6 +217,9 @@ export class MapComponent implements OnInit, OnDestroy {
     switch (this.layersToAdd[0]) {
       case 'osm':
         this.mapOptions.layers.push(this.osmLayer);
+        break;
+        case 'opentopomap':
+        this.mapOptions.layers.push(this.openTopoMapLayer);
         break;
       case 'google hybrid':
         this.mapOptions.layers.push(this.googleHybridLayer);
