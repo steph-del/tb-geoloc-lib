@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatAutocompleteSelectedEvent } from '@angular/material';
 import { Subscription, Observable, zip } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { isDefined } from '@angular/compiler/src/util';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import { LatLngExpression } from 'leaflet';
@@ -376,7 +377,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setMapEditMode();
     // @TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
 
     // Set (decimal) latLng inputs
     this.latlngFormGroup.controls.latInput.setValue(geopoint.getLatDec(), { emitEvent: false });
@@ -398,7 +399,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
 
     // Set dmsLatLng inputs
     this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
@@ -434,13 +435,13 @@ export class MapComponent implements OnInit, OnDestroy {
    * What is done inside this function :
    * - create an observable that zip all required observables
    * - do a switchmap on the main observable so that if one one the sub-observable change, old data are ignored
-   * - when the main observable is finished, can send new location Output
+   * - if a callback is NOT provided, when the main observable is finished, send new location Output
    *
    * Several if / else avoidCallingElevationApi are used because when
    * avoidCallingElevationApi === false, httpTasks returns a single value (osmPlace)
    * whereas if avoidCallingElevationApi === true, httpTasks returns an array of 2 values [elevation, osmPlace]
    */
-  callGeolocElevationApisUsingLatLngInputsValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false): void {
+  callGeolocElevationApisUsingLatLngInputsValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false, callback?: Function): void {
 
     this.setLatLngInputFromDrawnItems();
     this.setLatLngDmsInputFromDrawnItems();
@@ -489,11 +490,16 @@ export class MapComponent implements OnInit, OnDestroy {
         this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace), {emitEvent: false});
       }
 
-      // bind _location & emit location
-      if (avoidCallingElevationApi) {
-        this.bindLocationOutput([this.elevationFormGroup.controls.elevationInput.value, osmPlace]);
+      // callback ?
+      if (isDefined(callback)) {
+        callback(elevation, osmPlace);
       } else {
-        this.bindLocationOutput(result);
+        // bind _location & emit location
+        if (avoidCallingElevationApi) {
+          this.bindLocationOutput([this.elevationFormGroup.controls.elevationInput.value, osmPlace]);
+        } else {
+          this.bindLocationOutput(result);
+        }
       }
 
     }, error => {
@@ -604,7 +610,10 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     // Call geoloc and elevation APIs
-    this.callGeolocElevationApisUsingLatLngInputsValues(false, false);
+    this.callGeolocElevationApisUsingLatLngInputsValues(false, true, (result: {elevation: any, osmPlace: any}) => {
+      const elevation = result.elevation;
+      this.bindLocationOutput([elevation, osmPlace]);
+    });
 
   }
 
