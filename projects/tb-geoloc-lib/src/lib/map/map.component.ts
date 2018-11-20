@@ -94,8 +94,6 @@ export class MapComponent implements OnInit, OnDestroy {
   drawControlFull: L.Control.Draw;  // draw panel
   drawControlEdit: L.Control.Draw;  // edit panel
 
-
-
   // ----
   // CODE
   // ----
@@ -410,7 +408,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-  *
+  * Draw a polyline on drawItems featureGroup
   */
   addPolyline(coordinates: LatLngExpression[]) {
     // clear drawn items layer
@@ -506,6 +504,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Set latitude and longitude in decimal format from drawItems featureGroup
    * Should be improved for complex polygons / polylines ?
    * Could use turf.js
    */
@@ -516,7 +515,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
+   * Set input latitude and longitude in DMS format drawItems featureGroup
    */
   setLatLngDmsInputFromDrawnItems(): void {
     const centroid = this.drawnItems.getBounds().getCenter();
@@ -723,7 +722,4 @@ export class MapComponent implements OnInit, OnDestroy {
     this.geolocatedPhotoLatLngLayer.clearLayers();
   }
 
-  latLngDmsAutoFormatter(value): string {
-    return '';
-  }
 }

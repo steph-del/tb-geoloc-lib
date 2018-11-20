@@ -28,6 +28,10 @@ export class GeocodingService {
     );
   }
 
+  /**
+   * Nominatim returns a lot of data... not always the same data
+   * We only want structured data to be shown to the user : a readbale address here
+   */
   getReadbleAddress(osmPlaceResult: OsmPlaceModel): string {
     let locality: string = null;    // city or village or ...
     let subLocality: string = null; // district or
@@ -76,6 +80,10 @@ export class GeocodingService {
 
   }
 
+  /**
+   * Filter the Nominatim results by its key:value tags
+   * OSM tags : https://github.com/openstreetmap/Nominatim/blob/80df4d3b560f5b1fd550dcf8cdc09a992b69fee0/settings/partitionedtags.def
+   */
   osmClassFilter(osmClassFilter: Array<string>, osmResults: Array<NominatimObject>) {
     const osmFilteredResults: Array<NominatimObject> = [];
     if (osmClassFilter.length > 0 && osmResults.length > 0) {
@@ -106,6 +114,9 @@ export class GeocodingService {
     }
   }
 
+  /**
+   * Sometime, we have to reverse latitude and longitude according to Leaflet specifications
+   */
   reverseCorrdinatesArray(coordinatesArray: Array<[number, number]>) {
     if (coordinatesArray.length > 0) {
       coordinatesArray.forEach(item => {
@@ -115,6 +126,9 @@ export class GeocodingService {
     }
   }
 
+  /**
+   * Returns a simple line (2 points) from a polyline
+   */
   simplifyPolyline(coordinatesArray: Array<[number, number]>): Array<[number, number]> {
     if (coordinatesArray.length > 1) {
       const firstCoordinate = coordinatesArray[0];

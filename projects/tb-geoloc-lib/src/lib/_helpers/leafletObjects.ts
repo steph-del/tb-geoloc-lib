@@ -1,14 +1,7 @@
-/**
- *
- */
-
 import * as L from 'leaflet';
 
 /**
- *
- * @param lat
- * @param lng
- * @param dragend callback
+ * Basic draggable marker
  */
 export const draggableMarker = function(lat: number, lng: number, dragend: Function): L.Marker {
   const simpleIcon = simpleIconMarker();
@@ -18,7 +11,7 @@ export const draggableMarker = function(lat: number, lng: number, dragend: Funct
 };
 
 /**
- *
+ * Basic icon
  */
 export const simpleIconMarker = function(): L.Icon {
   return L.icon({
@@ -29,7 +22,7 @@ export const simpleIconMarker = function(): L.Icon {
 };
 
 /**
- *
+ * Main control panel
  */
 export function drawControlPanel(_marker: boolean, _polyline: boolean, _polygon: boolean) {
   return new L.Control.Draw({
@@ -46,8 +39,7 @@ export function drawControlPanel(_marker: boolean, _polyline: boolean, _polygon:
 }
 
 /**
- *
- * @param editedLayer
+ * Main edit panel
  */
 export function drawControlEditPanel(editedLayer, allowEditDrawnItems: boolean) {
   const editOpt: any = allowEditDrawnItems === true ? {} : false;
@@ -71,7 +63,7 @@ export function drawControlEditPanel(editedLayer, allowEditDrawnItems: boolean) 
 }
 
 /**
- *
+ * Simple circle
  */
 export const circleMarkerStyle = {
   radius: 6,
@@ -83,7 +75,7 @@ export const circleMarkerStyle = {
 };
 
 /**
- *
+ * Administrative area style
  */
 export const cityStyle = {
   color: '#ff7800',
@@ -92,7 +84,7 @@ export const cityStyle = {
 };
 
 /**
- *
+ * GPS-photo location icon
  */
 export const gpsPhotoMarkerIcon = (): L.Icon => {
   return L.icon({
@@ -108,7 +100,7 @@ export const gpsPhotoMarkerIcon = (): L.Icon => {
 };
 
 /**
- *
+ * GPS-photo location icon, highlighted
  */
 export const gpsPhotoMarkerIconHighlight = (): L.Icon => {
   return L.icon({
