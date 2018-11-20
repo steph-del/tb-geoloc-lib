@@ -1,15 +1,4 @@
-/**
- * @todo limit polygon area / polyline lenght
- * @todo fix form input not updated after .setValue (except for the gpsMarkerSetValues method)
- * see : https://github.com/angular/material2/issues/7601#issuecomment-334947280,
- *       https://github.com/angular/material2/issues/2434,
- *       https://github.com/angular/material2/issues/2363,
- *       https://github.com/angular/material2/pull/2455,
- *       https://github.com/angular/material2/issues/2837#issuecomment-276538616,
- *       https://github.com/angular/material2/issues/7601,
- *       https://github.com/angular/material2/issues/2441
- */
-import { Component, OnInit, OnDestroy, EventEmitter, Input, Output } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material';
 import { Subscription, Observable, zip } from 'rxjs';
@@ -114,7 +103,8 @@ export class MapComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private geocodeService: GeocodingService,
-    private elevationService: ElevationService) { }
+    private elevationService: ElevationService,
+    private zone: NgZone) { }
 
   /**
    * - Create the forms
@@ -255,6 +245,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /**
    * Add layers and events listeners
+   * Several leaflet event callback handler happens outside of the Angular zone
+   * see https://github.com/Asymmetrik/ngx-leaflet#a-note-about-change-detection
+   * For these events, if needed (especially for input updates, spinners, etc.), we run it into the Angular zone
    */
   onMapReady(map: L.Map) {
     this.map = map;
@@ -271,7 +264,11 @@ export class MapComponent implements OnInit, OnDestroy {
       // We just draw a new draggableMarker instead
       if (this.drawType === 'marker') {
         const latlng = this.drawnItem._latlng;
-        leafletObjects.draggableMarker(latlng.lat, latlng.lng, (dragEnd) => { this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
+        leafletObjects.draggableMarker(latlng.lat, latlng.lng, (dragEnd) => {
+          this.zone.run(() => {
+            this.callGeolocElevationApisUsingLatLngInputsValues();
+          });
+        }).addTo(this.drawnItems);
       } else {
         this.drawnItems.addLayer(this.drawnItem);
       }
@@ -282,7 +279,9 @@ export class MapComponent implements OnInit, OnDestroy {
         this.setMapEditMode();
       }
       if (this.drawnItems.getLayers().length === 1) {
-        this.callGeolocElevationApisUsingLatLngInputsValues();
+        this.zone.run(() => {
+          this.callGeolocElevationApisUsingLatLngInputsValues();
+        });
       }
 
       this.flyToDrawnItems();
@@ -295,7 +294,9 @@ export class MapComponent implements OnInit, OnDestroy {
 //      this.drawnItems.addLayer(this.drawnItem);
 
       if (this.drawnItems.getLayers().length === 1) {
-        this.callGeolocElevationApisUsingLatLngInputsValues();
+        this.zone.run(() => {
+          this.callGeolocElevationApisUsingLatLngInputsValues();
+        });
       }
 
       this.flyToDrawnItems();
@@ -305,7 +306,9 @@ export class MapComponent implements OnInit, OnDestroy {
       this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
       this.setMapDrawMode();
-      this.clearForm();
+      this.zone.run(() => {
+        this.clearForm();
+      });
     });
 
     this.redrawMap(100);
