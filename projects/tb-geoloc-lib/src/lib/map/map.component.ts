@@ -46,6 +46,8 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() marker = true;
   @Input() polyline = true;
   @Input() polygon = true;
+  @Input() latLngInit = [46.55886030311719, 2.9882812500000004];
+  @Input() zoomInit = 4;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -80,6 +82,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // LEAFLET VARIABLES, LAYERS AND MAP CONFIG
   // ----------------------------------------
   private map: L.Map;
+  public mapOptions: any;
   public mapLat = 0;
   public mapLng = 0;
   private drawType: string;
@@ -92,13 +95,6 @@ export class MapComponent implements OnInit, OnDestroy {
   private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
   private geoResultsLayer = L.geoJSON(null, {style: function() { return { color: '#ff7800', weight: 5, opacity: 0.65 }; }});
   private geolocatedPhotoLatLngLayer = L.geoJSON();
-
-  // map options
-  mapOptions = {
-    layers: [],
-    zoom: 4,
-    center: L.latLng({ lat: 46.55886030311719, lng: 2.9882812500000004 })
-  };
 
   // Leaflet map configuration
   drawnItems: L.FeatureGroup = new L.FeatureGroup();  // all drawn items
@@ -201,6 +197,13 @@ export class MapComponent implements OnInit, OnDestroy {
       // Fit map to geolocated photos markers
       this.flyToGeolocatedPhotoItems();
     });
+
+    // Map options
+    this.mapOptions = {
+      layers: [],
+      zoom: this.zoomInit,
+      center: L.latLng({ lat: this.latLngInit[0], lng: this.latLngInit[1] })
+    };
 
     // this.allowEditDrawnItems, this.marker, this.polyline & this.polygon are not set until onInit is call
     // for other draw controls, see code above

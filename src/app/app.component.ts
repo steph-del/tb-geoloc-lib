@@ -7,7 +7,6 @@ import { Component, EventEmitter } from '@angular/core';
 })
 export class AppComponent {
   testLatLngData: EventEmitter<Array<LatLngDMSAltitudePhotoName>> = new EventEmitter();
-  osmClassFilter = ['highway:*'];
 
   public locationChange(data) {
     console.log(data);
