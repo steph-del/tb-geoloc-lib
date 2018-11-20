@@ -10,6 +10,7 @@
   #geoloc-map-meta {
     flex: 1;
     padding: 15px;
+    padding-bottom: 0px;
 
     .geolocationInputs {
       display: flex;
@@ -41,4 +42,16 @@ button {
 
 .geolocatedPhotoMetadataTable {
   width: 100%;
+}
+
+.sub-map-infos {
+  color: #C5C5C5;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  padding: 5px;
+
+  &.has-data {
+    color: black;
+  }
 }

@@ -38,6 +38,7 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() latLngInit = [46.55886030, 2.98828125];
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
+  @Input() showLatLngElevationInputs = true;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 

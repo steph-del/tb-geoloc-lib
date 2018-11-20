@@ -11,7 +11,7 @@
       </mat-autocomplete>
     </mat-form-field>
     
-    <div class="geolocationInputs">
+    <div class="geolocationInputs" *ngIf="showLatLngElevationInputs">
       <!-- lat/lng inputs -->
       <div [formGroup]="latlngFormGroup">
         <!-- latitude / longitude decimal format -->
@@ -85,5 +85,11 @@
       leaflet 
       [leafletOptions]="mapOptions"
       (leafletMapReady)="onMapReady($event)">
+  </div>
+  <div *ngIf="!showLatLngElevationInputs" class="sub-map-infos" [class.has-data]="latlngFormGroup.controls.latInput.value !== '' && latlngFormGroup.controls.lngInput.value !== ''">
+    <div>latitude : {{ latlngFormGroup.controls.latInput.value | number:'2.0-6' }}</div>
+    <div>longitude : {{ latlngFormGroup.controls.lngInput.value | number:'2.0-6' }}</div>
+    <div *ngIf="!isLoadingElevation">altitude : {{ elevationFormGroup.controls.elevationInput.value }} m</div>
+    <div *ngIf="isLoadingElevation">altitude : calcul en cours...</div>
   </div>
 </div>
