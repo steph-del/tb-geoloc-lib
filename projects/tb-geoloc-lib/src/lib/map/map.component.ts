@@ -56,6 +56,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // VARIABLES
   // ---------
   _location = <LocationModel>{};
+  osmPlace: any = null;
   geolocatedPhotoLatLngData: Array<LatLngDMSAltitudePhotoName> = [];
   geolocatedPhotoLatLngDisplayedColumnsTable: Array<string> = ['select', 'photoName', 'lat', 'lng', 'altitude'];
   isLoadingAddress = false;
@@ -69,6 +70,7 @@ export class MapComponent implements OnInit, OnDestroy {
   geoSearchSubscription = new Subscription;
   latDmsInputSubscription = new Subscription;
   lngDmsInputSubscription = new Subscription;
+  elevationInputSubscription = new Subscription;
 
   // ----------------------------------------
   // LEAFLET VARIABLES, LAYERS AND MAP CONFIG
@@ -189,6 +191,17 @@ export class MapComponent implements OnInit, OnDestroy {
       this.flyToGeolocatedPhotoItems();
     });
 
+    // Watch elevation input change
+    this.elevationInputSubscription = this.elevationFormGroup.controls.elevationInput.valueChanges
+    .pipe(
+      debounceTime(500)
+    ).subscribe(result => {
+      if (this.osmPlace !== null) {
+        const elevation = result;
+      this.bindLocationOutput([elevation, this.osmPlace]);
+      }
+    });
+
     // Map options
     this.mapOptions = {
       layers: [],
@@ -241,6 +254,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.geoSearchSubscription.unsubscribe();
     this.latDmsInputSubscription.unsubscribe();
     this.lngDmsInputSubscription.unsubscribe();
+    this.elevationInputSubscription.unsubscribe();
   }
 
   /**
@@ -442,7 +456,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * whereas if avoidCallingElevationApi === true, httpTasks returns an array of 2 values [elevation, osmPlace]
    */
   callGeolocElevationApisUsingLatLngInputsValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false, callback?: Function): void {
-
+    this.osmPlace = null;
     this.setLatLngInputFromDrawnItems();
     this.setLatLngDmsInputFromDrawnItems();
     let httpTasks: Observable<any>;
@@ -481,9 +495,10 @@ export class MapComponent implements OnInit, OnDestroy {
         elevation = result[0];
         osmPlace = result[1];
       }
+      this.osmPlace = osmPlace;
 
       // Set elevation input
-      if (!avoidCallingElevationApi) { this.elevationFormGroup.controls.elevationInput.setValue(elevation); }
+      if (!avoidCallingElevationApi) { this.elevationFormGroup.controls.elevationInput.setValue(elevation, {emitEvent: false}); }
 
       // Patch place input value
       if (!avoidCallingGeolocApi) {
@@ -610,9 +625,14 @@ export class MapComponent implements OnInit, OnDestroy {
     }
 
     // Call geoloc and elevation APIs
-    this.callGeolocElevationApisUsingLatLngInputsValues(false, true, (result: {elevation: any, osmPlace: any}) => {
-      const elevation = result.elevation;
-      this.bindLocationOutput([elevation, osmPlace]);
+    this.callGeolocElevationApisUsingLatLngInputsValues(false, true, (data: Array<any> | any) => {
+      let _elevation: any;
+      if (Array.isArray(data)) {
+        _elevation = data[0];
+      } else {
+        _elevation = data;
+      }
+      this.bindLocationOutput([_elevation, osmPlace]);
     });
 
   }
@@ -720,7 +740,7 @@ export class MapComponent implements OnInit, OnDestroy {
     // set inputs values
     this.latlngFormGroup.controls.latInput.setValue(latDec);
     this.latlngFormGroup.controls.lngInput.setValue(lngDec);
-    this.elevationFormGroup.controls.elevationInput.setValue(elevation);
+    this.elevationFormGroup.controls.elevationInput.setValue(elevation, {emitEvent: false});
 
     // add marker
     this.addMarkerFromLatLngCoord();
