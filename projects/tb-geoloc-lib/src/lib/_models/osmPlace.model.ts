@@ -27,6 +27,7 @@ export interface OsmPlaceAddressModel {
   postcode: string;
 
   neighbourhood: string;
+  pedestrian?: string;
   road: string;
   state: string;
   suburb: string;

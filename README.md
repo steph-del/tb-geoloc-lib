@@ -20,10 +20,20 @@ Exemple d'utilisation :
 Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insérer la balise `<tb-geoloc-map></tb-geoloc-map>`, ça fonctionne.
 
 
-| Paramètre                 | Requis | Type     | Valeurs | Valeur par défaut | Description |
+| Paramètre                 | Requis | Type     | Valeurs | Valeur par défaut | Description / Commentaire |
 | ---                       | ---    | ---      | ---     | ---               | ---         |
-| layersToAdd               |        | Array<string>   | ['osm', 'brgm', ...] | ['osm'] | non encore implémenté |
-| geolocatedPhotoLatLng     |        | un Observable contenant un tableau de `LatLngDMSAltitudePhotoName` | voir le type | - | cet @Input est soumis à souscription. Les photos géolocalisées sont alors utilisables dans le composant. Fonctionne de concert avec le module `tb-dropbox-lib` |
+| layersToAdd               |        | Array<string>   | 'osm', 'opentopomap', 'google hybrid', 'brgm' | ['osm'] |  |
+| geolocatedPhotoLatLng     |        | Un Observable contenant un tableau de `LatLngDMSAltitudePhotoName` | voir le type | - | cet @Input est soumis à souscription. Les données de géolocalisation sont alors utilisables dans le composant. Fonctionne de concert avec le module `tb-dropbox-lib` |
+| osmClassFilter            |        | Array<string> | [Voir les tags OSM](https://github.com/openstreetmap/Nominatim/blob/80df4d3b560f5b1fd550dcf8cdc09a992b69fee0/settings/partitionedtags.def) + [le wiki OSM (ex pour les routes](https://wiki.openstreetmap.org/wiki/Key:highway)) |  | Les paramètres se composent d'une clé et d'une valeur. Ex : 'highway:primary'. On peut utiliser le caractère '*' pour inclure toutes les valeurs de la clé. Ex: 'highway:*'. |
+| allowEditDrawnItems       |        | boolean  |          | false            | Active la possibilté d'éditer l'entité dessinées |
+| marker                    |        | boolean  |          | true             | Permet de dessiner (placer) un marquer           |
+| polygon                   |        | boolean  |          | true             | Permet de dessiner un polygone                   |
+| polyline                  |        | boolean  |          | true             | Permet de dessiner une polyligne                 |
+| latLngInit                |        | [number, number] |  | [46.55886030, 2.98828125] | Centrage de la carte au démarrage       |
+| zoomInit                  |        | number   |          | 4                | Zoom au démarrage de la carte (min et max peuvent dépendre des capacités de la couche affichée par défaut) |
+| getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
+  
+Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
 
 LatLngDMSAltitudePhotoName (model) :
 
@@ -36,7 +46,7 @@ LatLngDMSAltitudePhotoName (model) :
 | latDms      | string                                  | optionnel, si déjà calculé
 | lngDms      | string                                  | optionnel, si déjà calculé
 | latDec      | number                                  | optionnel, si déjà calculé   |
-| lngDec      | numbe                                   | optionnel, si déjà calculé   |
+| lngDec      | number                                  | optionnel, si déjà calculé   |
 
 ### Paramètres en sortie @Output
 

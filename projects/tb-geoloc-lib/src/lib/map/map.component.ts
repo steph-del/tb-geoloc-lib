@@ -16,6 +16,7 @@ import { Subscription, Observable, zip } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import * as L from 'leaflet';
 import 'leaflet-draw';
+import { LatLngExpression } from 'leaflet';
 
 import { GeoPoint } from '../_helpers/geoConvert';
 import * as leafletObjects from '../_helpers/leafletObjects';
@@ -25,6 +26,7 @@ import { GeocodingService } from '../_services/geocoding.service';
 import { ElevationService } from '../_services/elevation.service';
 
 import { LocationModel } from '../_models/location.model';
+import { NominatimObject } from '../_models/nominatimObj.model';
 import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 
 @Component({
@@ -39,6 +41,14 @@ export class MapComponent implements OnInit, OnDestroy {
   // --------------
   @Input() layersToAdd: Array<string> = ['osm'];
   @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
+  @Input() osmClassFilter: Array<string> = [];
+  @Input() allowEditDrawnItems = false;
+  @Input() marker = true;
+  @Input() polyline = true;
+  @Input() polygon = true;
+  @Input() latLngInit = [46.55886030, 2.98828125];
+  @Input() zoomInit = 4;
+  @Input() getOsmSimpleLine = false;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -48,7 +58,7 @@ export class MapComponent implements OnInit, OnDestroy {
   latlngFormGroup: FormGroup;
   elevationFormGroup: FormGroup;
   geoSearchFormGroup: FormGroup;
-  geoSearchResults: Array<any>;
+  geoSearchResults: Array<NominatimObject>;
   coordFormat = 'dms';            // 'decimal' | 'dms'
 
   // ---------
@@ -73,36 +83,27 @@ export class MapComponent implements OnInit, OnDestroy {
   // LEAFLET VARIABLES, LAYERS AND MAP CONFIG
   // ----------------------------------------
   private map: L.Map;
+  public mapOptions: any;
   public mapLat = 0;
   public mapLng = 0;
   private drawType: string;
   private drawnItem: any;
 
   private osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
-  private googleSatelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
+  private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'OpenTopoMap'});
   private googleHybridLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
   private brgmLayer = L.tileLayer.wms('http://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
-  private mapLayers = {
-    'Google': this.googleHybridLayer,
-    'OSM': this.osmLayer,
-    'BRGM': this.brgmLayer
-  };
+  private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
   private geoResultsLayer = L.geoJSON(null, {style: function() { return { color: '#ff7800', weight: 5, opacity: 0.65 }; }});
   private geolocatedPhotoLatLngLayer = L.geoJSON();
 
-  // map options
-  options = {
-    layers: [ this.osmLayer ],
-    zoom: 4,
-    center: L.latLng({ lat: 46.55886030311719, lng: 2.9882812500000004 })
-  };
-
   // Leaflet map configuration
-  drawnItems = new L.FeatureGroup();  // all drawn items
-  drawControlFull = leafletObjects.drawControlPanel;      // draw panel
-  drawControlEdit = leafletObjects.drawControlEditPanel(this.drawnItems);  // edit panel
-  circleMarkerOpt = leafletObjects.circleMarkerStyle;     // marker options
-  geoResultsOpt = leafletObjects.cityStyle;
+  drawnItems: L.FeatureGroup = new L.FeatureGroup();  // all drawn items
+  circleMarkerOpt: any = leafletObjects.circleMarkerStyle;     // marker options
+  geoResultsOpt: any = leafletObjects.cityStyle;
+  // controls below are set inside onInit() function
+  drawControlFull: L.Control.Draw;  // draw panel
+  drawControlEdit: L.Control.Draw;  // edit panel
 
 
 
@@ -147,7 +148,14 @@ export class MapComponent implements OnInit, OnDestroy {
       })
     ).subscribe(results => {
       this.isLoadingAddress = false;
-      this.geoSearchResults = results;
+      // filter results if needed
+      if (this.osmClassFilter.length > 0) {
+        this.geocodeService.osmClassFilter(this.osmClassFilter, results).subscribe(filteredResults => {
+          this.geoSearchResults = filteredResults;
+        });
+      } else {
+        this.geoSearchResults = results;
+      }
     }, (error) => {
       // @toto manage error
       this.isLoadingAddress = false;
@@ -190,6 +198,40 @@ export class MapComponent implements OnInit, OnDestroy {
       // Fit map to geolocated photos markers
       this.flyToGeolocatedPhotoItems();
     });
+
+    // Map options
+    this.mapOptions = {
+      layers: [],
+      zoom: this.zoomInit,
+      center: L.latLng({ lat: this.latLngInit[0], lng: this.latLngInit[1] })
+    };
+
+    // this.allowEditDrawnItems, this.marker, this.polyline & this.polygon are not set until onInit is call
+    // for other draw controls, see code above
+    this.drawControlEdit = leafletObjects.drawControlEditPanel(this.drawnItems, this.allowEditDrawnItems);
+    this.drawControlFull = leafletObjects.drawControlPanel(this.marker, this.polyline, this.polygon);      // draw panel
+
+    // Add map layers
+    if (this.layersToAdd.indexOf('osm') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
+    if (this.layersToAdd.indexOf('opentopomap') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
+    if (this.layersToAdd.indexOf('google hybrid') !== -1) { this.mapLayers['Google hybride'] = this.googleHybridLayer; }
+    if (this.layersToAdd.indexOf('brgm') !== -1) { this.mapLayers['BRGM'] = this.brgmLayer; }
+
+    // First layer added is shown
+    switch (this.layersToAdd[0]) {
+      case 'osm':
+        this.mapOptions.layers.push(this.osmLayer);
+        break;
+        case 'opentopomap':
+        this.mapOptions.layers.push(this.openTopoMapLayer);
+        break;
+      case 'google hybrid':
+        this.mapOptions.layers.push(this.googleHybridLayer);
+        break;
+      case 'brgm':
+        this.mapOptions.layers.push(this.brgmLayer);
+        break;
+    }
 
     // Watch lat & lng DMS inputs changes and set up the DMS formatter
     // The DMS formatter restricts the keyboard input of the user : only number, comma, dot and '-', deg and min must be between -90 and +90
@@ -246,6 +288,19 @@ export class MapComponent implements OnInit, OnDestroy {
       this.flyToDrawnItems();
     });
 
+    this.map.on('draw:edited', (e) => {
+      this.drawnItem = e['layer'];
+      this.drawType = e['layerType'];
+
+//      this.drawnItems.addLayer(this.drawnItem);
+
+      if (this.drawnItems.getLayers().length === 1) {
+        this.callGeolocElevationApisUsingLatLngInputsValues();
+      }
+
+      this.flyToDrawnItems();
+    });
+
     this.map.on('draw:deleted', (e) => {
       this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
@@ -287,9 +342,9 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Set map bounds to drawn items
    */
-  flyToDrawnItems() {
+  flyToDrawnItems(_maxZoom = 14) {
     const b = this.drawnItems.getBounds();
-    this.map.flyToBounds(b, { maxZoom: 14, animate: false });
+    this.map.flyToBounds(b, { maxZoom: _maxZoom, animate: false });
   }
 
   /**
@@ -349,6 +404,24 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Fly
     this.flyToDrawnItems();
+  }
+
+  /**
+  *
+  */
+  addPolyline(coordinates: LatLngExpression[]) {
+    // clear drawn items layer
+    this.clearDrawnItemsLayer();
+
+    // update map toolbar
+    this.setMapEditMode();
+
+    // draw
+    const polyline = L.polyline(coordinates);
+    polyline.addTo(this.drawnItems);
+
+    // fly with max zoom
+    this.flyToDrawnItems(18);
   }
 
   /**
@@ -510,8 +583,22 @@ export class MapComponent implements OnInit, OnDestroy {
     this.latlngFormGroup.controls.dmsLngInput.setValue(g.getLonDeg(), {emitEvent: false});
     this.elevationFormGroup.controls.elevationInput.setValue(osmPlace.elevation, {emitEvent: false});
 
-    // Draw a marker at the center of the polygon
-    this.addMarkerFromLatLngCoord();
+    // Draw a polyline or place a marker at the center of a polygon
+    if (osmPlace.geojson.type === 'LineString') {
+      // osm geojson coordinates is like [[long, lat], [long, lat], ...]
+      // but leaflet needs [[lat, long], [lat, long], ...] format !
+      if (this.getOsmSimpleLine) {
+        this.addPolyline(this.geocodeService.reverseCorrdinatesArray(
+          this.geocodeService.simplifyPolyline(osmPlace.geojson.coordinates)) as LatLngExpression[]
+        );
+      } else {
+        this.addPolyline(this.geocodeService.reverseCorrdinatesArray(osmPlace.geojson.coordinates) as LatLngExpression[]
+        );
+      }
+      this.clearGeoResultsLayer();
+    } else {
+      this.addMarkerFromLatLngCoord();
+    }
 
     // Call geoloc and elevation APIs
     this.callGeolocElevationApisUsingLatLngInputsValues(false, false);

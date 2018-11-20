@@ -31,24 +31,27 @@ export const simpleIconMarker = function(): L.Icon {
 /**
  *
  */
-export const drawControlPanel = new L.Control.Draw({
-  position: 'topleft',
-  draw: {
-    marker: { icon: simpleIconMarker() },
-    polyline: {},
-    polygon: { showArea: true, metric: false },
-    rectangle: false,
-    circle: false,
-    circlemarker: false
-  }
-});
+export function drawControlPanel(_marker: boolean, _polyline: boolean, _polygon: boolean) {
+  return new L.Control.Draw({
+    position: 'topleft',
+    draw: {
+      marker: _marker ? { icon: simpleIconMarker() } : false,
+      polyline: _polyline ? {} : false,
+      polygon: _polygon ? { showArea: true, metric: false } : false,
+      rectangle: false,
+      circle: false,
+      circlemarker: false
+    }
+  });
+}
 
 /**
  *
  * @param editedLayer
  */
-export function drawControlEditPanel(editedLayer) {
-  return new L.Control.Draw({
+export function drawControlEditPanel(editedLayer, allowEditDrawnItems: boolean) {
+  const editOpt: any = allowEditDrawnItems === true ? {} : false;
+  const dcep = new L.Control.Draw({
     position: 'topleft',
     draw: {
       marker: false,
@@ -60,10 +63,11 @@ export function drawControlEditPanel(editedLayer) {
     },
     edit: {
       featureGroup: editedLayer, // this panel id editing editedLayer
-      edit: false,
+      edit: editOpt,
       remove: {}
     }
   });
+  return dcep;
 }
 
 /**
