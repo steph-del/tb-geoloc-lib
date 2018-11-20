@@ -39,14 +39,14 @@ export class MapComponent implements OnInit, OnDestroy {
   // --------------
   // INPUT / OUTPUT
   // --------------
-  @Input() layersToAdd: Array<string> = ['opentopomap'];
+  @Input() layersToAdd: Array<string> = ['osm'];
   @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
   @Input() osmClassFilter: Array<string> = [];
   @Input() allowEditDrawnItems = false;
   @Input() marker = true;
   @Input() polyline = true;
   @Input() polygon = true;
-  @Input() latLngInit = [46.55886030311719, 2.9882812500000004];
+  @Input() latLngInit = [46.55886030, 2.98828125];
   @Input() zoomInit = 4;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
