@@ -14,8 +14,12 @@
     .geolocationInputs {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      justify-content: space-around;
+
+      .longitude-input-group { margin-left: 5px; }
     }
+
   }
 
   #geoloc-map-draw {
