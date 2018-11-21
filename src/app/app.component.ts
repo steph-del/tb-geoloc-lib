@@ -6,7 +6,7 @@ import { Component, EventEmitter } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  testLatLngData: EventEmitter<Array<LatLngDMSAltitudePhotoName>> = new EventEmitter();
+  testLatLngData: any;
 
   public locationChange(data) {
     console.log(data);
@@ -35,7 +35,8 @@ export class AppComponent {
     ];
 
     console.log('app emit gps data...');
-    this.testLatLngData.next(data);
+    this.testLatLngData = data;
+    // this.testLatLngData.next(data);
   }
 }
 

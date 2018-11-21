@@ -30,7 +30,9 @@ export class MapComponent implements OnInit, OnDestroy {
   // INPUT / OUTPUT
   // --------------
   @Input() layersToAdd: Array<string> = ['osm'];
-  @Input() geolocatedPhotoLatLng: Observable<Array<LatLngDMSAltitudePhotoName>>;
+  @Input() set geolocatedPhotoLatLng(value: Array<LatLngDMSAltitudePhotoName>) {
+    this._geolocatedPhotoLatLng.emit(value);
+  }
   @Input() osmClassFilter: Array<string> = [];
   @Input() allowEditDrawnItems = false;
   @Input() marker = true;
@@ -57,6 +59,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // ---------
   _location = <LocationModel>{};
   osmPlace: any = null;
+  _geolocatedPhotoLatLng: EventEmitter<Array<LatLngDMSAltitudePhotoName>> = new EventEmitter();
   geolocatedPhotoLatLngData: Array<LatLngDMSAltitudePhotoName> = [];
   geolocatedPhotoLatLngDisplayedColumnsTable: Array<string> = ['select', 'photoName', 'lat', 'lng', 'altitude'];
   isLoadingAddress = false;
@@ -154,7 +157,7 @@ export class MapComponent implements OnInit, OnDestroy {
     });
 
     // Watch geolocated photo input changes
-    this.geolocatedPhotoLatLng.subscribe(photoLatLng => {
+    this._geolocatedPhotoLatLng.subscribe(photoLatLng => {
       // @todo clear this.geolocatedPhotoLatLngLayer
 
       this.geolocatedPhotoLatLngData = photoLatLng;
@@ -255,6 +258,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.latDmsInputSubscription.unsubscribe();
     this.lngDmsInputSubscription.unsubscribe();
     this.elevationInputSubscription.unsubscribe();
+    this._geolocatedPhotoLatLng.unsubscribe();
   }
 
   /**
