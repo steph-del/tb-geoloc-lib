@@ -61,7 +61,7 @@ export class MapComponent implements OnInit, OnDestroy {
   osmPlace: any = null;
   _geolocatedPhotoLatLng: EventEmitter<Array<LatLngDMSAltitudePhotoName>> = new EventEmitter();
   geolocatedPhotoLatLngData: Array<LatLngDMSAltitudePhotoName> = [];
-  geolocatedPhotoLatLngDisplayedColumnsTable: Array<string> = ['select', 'photoName', 'lat', 'lng', 'altitude'];
+  geolocatedPhotoLatLngDisplayedColumnsTable: Array<string> = ['select', 'fileName', 'lat', 'lng', 'altitude'];
   isLoadingAddress = false;
   isLoadingLatitude = false;
   isLoadingLongitude = false;
@@ -176,7 +176,7 @@ export class MapComponent implements OnInit, OnDestroy {
         const gpsPhotoMarker = new L.Marker(latLng, { icon: leafletObjects.gpsPhotoMarkerIcon() });
         // Marker popup
         const html = `
-          <b>Fichier "${data.photoName}"</b><br>
+          <b>Fichier "${data.fileName}"</b><br>
           Lat. : ${g.latDeg}<br />
           Lng. : ${g.lonDeg}<br />
           Alt. : ${data.altitude} m<br /><br />

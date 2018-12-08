@@ -7,7 +7,7 @@ export interface LatLngDMSAltitudePhotoName {
   lat: DMS;
   lng: DMS;
   altitude: number;
-  photoName: string;
+  fileName: string;
   latDms?: string;
   lngDms: string;
   latDec?: number;
