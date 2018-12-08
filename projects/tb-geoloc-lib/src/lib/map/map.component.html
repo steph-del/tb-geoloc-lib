@@ -31,10 +31,11 @@
             <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
             <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
           </mat-form-field>
-          
-          <button mat-icon-button (click)="addMarkerFromLatLngCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.latInput.valid || !latlngFormGroup.controls.lngInput.valid" color="primary">
-            <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
-          </button>
+          <mat-form-field>
+            <button mat-icon-button (click)="addMarkerFromLatLngCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.latInput.valid || !latlngFormGroup.controls.lngInput.valid" color="primary">
+              <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
+            </button>
+          </mat-form-field>
         </div>
 
         <!-- latitude / longitude DMS format -->
