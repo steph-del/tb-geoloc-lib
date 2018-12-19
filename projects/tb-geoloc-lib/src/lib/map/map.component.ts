@@ -219,7 +219,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Add map layers
     if (this.layersToAdd.indexOf('osm') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
-    if (this.layersToAdd.indexOf('opentopomap') !== -1) { this.mapLayers['OSM'] = this.osmLayer; }
+    if (this.layersToAdd.indexOf('opentopomap') !== -1) { this.mapLayers['OpenTopoMap'] = this.openTopoMapLayer; }
     if (this.layersToAdd.indexOf('google hybrid') !== -1) { this.mapLayers['Google hybride'] = this.googleHybridLayer; }
     if (this.layersToAdd.indexOf('brgm') !== -1) { this.mapLayers['BRGM'] = this.brgmLayer; }
 

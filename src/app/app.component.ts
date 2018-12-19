@@ -7,6 +7,7 @@ import { Component, EventEmitter } from '@angular/core';
 })
 export class AppComponent {
   testLatLngData: any;
+  layers = ['opentopomap'];
 
   public locationChange(data) {
     console.log(data);
