@@ -158,7 +158,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Watch geolocated photo input changes
     this._geolocatedPhotoLatLng.subscribe(photoLatLng => {
-      // @todo clear this.geolocatedPhotoLatLngLayer
+      this.geolocatedPhotoLatLngLayer.clearLayers();
 
       this.geolocatedPhotoLatLngData = photoLatLng;
 
