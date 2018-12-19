@@ -1,54 +1,30 @@
-import { Component, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
+import { LocationModel } from 'projects/tb-geoloc-lib/src/lib/_models/location.model';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class AppComponent {
-  testLatLngData: any;
-  layers = ['opentopomap'];
+  @Input() layersToAdd: Array<string> = ['osm'];
+  @Input() geolocatedPhotoLatLng: any;
+  @Input() osmClassFilter: Array<string> = ['highway:*'];
+  @Input() allowEditDrawnItems: boolean;
+  @Input() marker = false;
+  @Input() polyline = true;
+  @Input() polygon = false;
+  @Input() latLngInit: Array<number> = [46.55886030, 2.98828125];
+  @Input() zoomInit = 4;
+  @Input() getOsmSimpleLine = true;
+  @Input() showLatLngElevationInputs = false;
 
-  public locationChange(data) {
-    console.log(data);
+  @Output() location = new EventEmitter<LocationModel>(); // object to return
+
+  constructor() { }
+
+  newLocation(data) {
+    this.location.emit(data);
   }
-
-  public emitLatLngData() {
-    const data = [
-      {
-        lat: {deg: 44, min: 27, sec: 8.976},
-        lng: {deg: 1, min: 9, sec: 24.84},
-        altitude: 187.6,
-        photoName: 'PA050156.JPG'
-      },
-      {
-        lat: {deg: 46, min: 27, sec: 5.432},
-        lng: {deg: 3, min: 12, sec: 24.84},
-        altitude: 187.6,
-        photoName: 'PA050234.JPG'
-      },
-      {
-        lat: {deg: 48, min: 25, sec: 8.765},
-        lng: {deg: 6, min: 15, sec: 24.84},
-        altitude: 187.6,
-        photoName: 'PA050789.JPG'
-      }
-    ];
-
-    console.log('app emit gps data...');
-    this.testLatLngData = data;
-    // this.testLatLngData.next(data);
-  }
-}
-
-export interface LatLngDMSAltitudePhotoName {
-  lat: DMS;
-  lng: DMS;
-  altitude: number;
-  photoName: string;
-}
-export interface DMS {
-  deg: number;
-  min: number;
-  sec: number;
 }

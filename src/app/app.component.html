@@ -1,8 +1,14 @@
 <tb-geoloc-map
-  [geolocatedPhotoLatLng]=testLatLngData
-  [layersToAdd]="layers"
-  (location)=locationChange($event)>
+  [layersToAdd]="layersToAdd"
+  [geolocatedPhotoLatLng]="geolocatedPhotoLatLng"
+  [osmClassFilter]="osmClassFilter"
+  [allowEditDrawnItems]="allowEditDrawnItems"
+  [marker]="marker"
+  [polyline]="polyline"
+  [polygon]="polygon"
+  [latLngInit]="latLngInit"
+  [zoomInit]="zoomInit"
+  [getOsmSimpleLine]="getOsmSimpleLine"
+  [showLatLngElevationInputs]="showLatLngElevationInputs"
+  (location)="newLocation($event)">
 </tb-geoloc-map>
-
-<br /><br /><br />
-<div (click)="emitLatLngData()">Simuler l'import de photos géolocalisées</div>
