@@ -56,7 +56,41 @@ button {
   }
 }
 
-.latLngMenuInputs {
+.lat-lng-dms-wrapper, .lat-lng-dec-wrapper {
   display: flex;
-  flex-wrap: nowrap;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
+@media only screen and (max-width: 600px) {
+  .lat-lng-dms-wrapper, .lat-lng-dec-wrapper {
+    justify-content: center;
+    .longitude-wrapper {
+      margin-left: 70px;
+    }
+  }
+}
+@media only screen and (max-width: 360px) {
+  .lat-lng-dms-wrapper, .lat-lng-dec-wrapper {
+    justify-content: center;
+    .longitude-wrapper {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      margin-left: 37px;
+      /deep/.mat-form-field-wrapper {
+        max-width: 160px;
+      }
+    }
+    .latitude-wrapper {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: nowrap;
+      margin-left: -37px;
+      /deep/.mat-form-field-wrapper {
+        max-width: 160px;
+      }
+    }
+  }
+}
+
+

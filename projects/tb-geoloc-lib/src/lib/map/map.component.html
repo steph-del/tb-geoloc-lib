@@ -15,53 +15,60 @@
       <!-- lat/lng inputs -->
       <div [formGroup]="latlngFormGroup">
         <!-- latitude / longitude decimal format -->
-        <div class="latLngMenuInputs" *ngIf="coordFormat=='decimal'">
+        <div class="lat-lng-dec-wrapper" *ngIf="coordFormat=='decimal'">
           <!-- latitude / longitude format selection -->  
-          <button mat-icon-button [matMenuTriggerFor]="menu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
+          <div class="latitude-wrapper">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
 
-          <mat-form-field class="latitude-input-group">
-            <input matInput formControlName="latInput" placeholder="latitude">
-            <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
-            <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
-          </mat-form-field>
-          <mat-form-field class="longitude-input-group">
-            <input matInput formControlName="lngInput" placeholder="longitude">
-            <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
-            <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
-          </mat-form-field>
-          <mat-form-field>
+            <mat-form-field class="latitude-input-group">
+              <input matInput formControlName="latInput" placeholder="latitude">
+              <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
+              <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="longitude-wrapper">
+            <mat-form-field class="longitude-input-group">
+              <input matInput formControlName="lngInput" placeholder="longitude">
+              <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
+              <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
+            </mat-form-field>
             <button mat-icon-button (click)="addMarkerFromLatLngCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.latInput.valid || !latlngFormGroup.controls.lngInput.valid" color="primary">
               <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
             </button>
-          </mat-form-field>
+          </div>
         </div>
 
         <!-- latitude / longitude DMS format -->
-        <div *ngIf="coordFormat=='dms'">
-          <!-- latitude / longitude format selection -->  
-          <button mat-icon-button [matMenuTriggerFor]="menu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
+        <div *ngIf="coordFormat=='dms'" class="lat-lng-dms-wrapper">
+          <!-- latitude / longitude format selection --> 
+          <div class="latitude-wrapper">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
 
-          <mat-form-field class="latitude-input-group">
-            <input matInput formControlName="dmsLatInput" placeholder="(deg)°  (min)'  (sec)&quot;">
-            <span matPrefix>N&nbsp;</span>
-            <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
-            <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
-          </mat-form-field>
+            <mat-form-field class="latitude-input-group">
+              <input matInput formControlName="dmsLatInput" placeholder="(deg)°  (min)'  (sec)&quot;">
+              <span matPrefix>N&nbsp;</span>
+              <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
+              <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
+            </mat-form-field>
+          </div>
 
-          <mat-form-field class="longitude-input-group">
-            <input matInput formControlName="dmsLngInput" placeholder="(deg)°  (min)'  (sec)&quot;">
-            <span matPrefix>E&nbsp;</span>
-            <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
-            <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
-          </mat-form-field>
+          <div class="longitude-wrapper">
+            <mat-form-field class="longitude-input-group">
+              <input matInput formControlName="dmsLngInput" placeholder="(deg)°  (min)'  (sec)&quot;">
+              <span matPrefix>E&nbsp;</span>
+              <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
+              <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
+            </mat-form-field>
 
-          <button mat-icon-button (click)="addMarkerFromDmsCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.dmsLatInput.valid || !latlngFormGroup.controls.dmsLngInput.valid" color="primary">
-            <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
-          </button>
+            <button mat-icon-button (click)="addMarkerFromDmsCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.dmsLatInput.valid || !latlngFormGroup.controls.dmsLngInput.valid" color="primary">
+              <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
+            </button>
+          </div>
         </div>
 
         <!-- menu format decimal / dms-->
