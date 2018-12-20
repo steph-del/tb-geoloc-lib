@@ -10,14 +10,14 @@ import { LocationModel } from 'projects/tb-geoloc-lib/src/lib/_models/location.m
 export class AppComponent {
   @Input() layersToAdd: Array<string> = ['osm'];
   @Input() geolocatedPhotoLatLng: any;
-  @Input() osmClassFilter: Array<string> = ['highway:*'];
-  @Input() allowEditDrawnItems: boolean;
-  @Input() marker = false;
-  @Input() polyline = true;
+  @Input() osmClassFilter: Array<string> = [];
+  @Input() allowEditDrawnItems = true;
+  @Input() marker = true;
+  @Input() polyline = false;
   @Input() polygon = false;
   @Input() latLngInit: Array<number> = [46.55886030, 2.98828125];
   @Input() zoomInit = 4;
-  @Input() getOsmSimpleLine = true;
+  @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = false;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return

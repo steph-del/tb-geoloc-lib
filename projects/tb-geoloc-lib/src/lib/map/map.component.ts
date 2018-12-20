@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material';
 import { Subscription, Observable, zip } from 'rxjs';
@@ -22,7 +22,8 @@ import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 @Component({
   selector: 'tb-geoloc-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss']
+  styleUrls: ['./map.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class MapComponent implements OnInit, OnDestroy {
 
