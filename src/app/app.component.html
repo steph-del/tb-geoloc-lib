@@ -1,6 +1,8 @@
 <tb-geoloc-map
   [geolocatedPhotoLatLng]=testLatLngData
   [layersToAdd]="layers"
+  elevationProvider="mapQuest"
+  [mapQuestApiKey]="mapQuestApiKey"
   (location)=locationChange($event)>
 </tb-geoloc-map>
 

@@ -10,8 +10,13 @@ import { isDefined } from '@angular/compiler/src/util';
   providedIn: 'root'
 })
 export class GeocodingService {
+  mapQuestApiKey: string = null;
 
   constructor(private http: HttpClient) { }
+
+  public setMapQuestApiKey(apiKey: string): void {
+    if (apiKey !== null) { this.mapQuestApiKey = apiKey; }
+  }
 
   geocode(address: string): Observable<any> {
     if (address === null) { return empty(); } // Avoid sending request on form reset

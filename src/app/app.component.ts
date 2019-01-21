@@ -8,6 +8,7 @@ import { Component, EventEmitter } from '@angular/core';
 export class AppComponent {
   testLatLngData: any;
   layers = ['osm', 'google hybrid', 'brgm', 'opentopomap'];
+  mapQuestApiKey = 'ApIFfQWsb8jW6bkYDD2i0Sq5BD9moJ3l';
 
   public locationChange(data) {
     console.log(data);

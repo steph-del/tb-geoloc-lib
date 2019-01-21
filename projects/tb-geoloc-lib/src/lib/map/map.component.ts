@@ -43,6 +43,10 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = true;
 
+  @Input() elevationProvider: 'openElevation' | 'mapQuest' = 'openElevation';
+  @Input() geolocationProvider: 'osm' | 'mapQuest' = 'osm';
+  @Input() mapQuestApiKey: string;
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
   // -------------------------
@@ -116,6 +120,9 @@ export class MapComponent implements OnInit, OnDestroy {
    * - Set up subscriptions (geo search, geolocated photos, lat / lng inputs)
    */
   ngOnInit() {
+    // Init API
+    this.initApi();
+
     // Create forms
     this.latlngFormGroup = this.fb.group({
       latInput: this.fb.control('', [Validators.required, this.latLngDecValidator]),
@@ -250,6 +257,13 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * API initialization
+   */
+  initApi() {
+    this.elevationService.setMapQuestApiKey(this.mapQuestApiKey);
+    this.geocodeService.setMapQuestApiKey(this.mapQuestApiKey);
+  }
   /**
    * Unsubscribe
    */
@@ -554,7 +568,7 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    */
   getElevationFromInputValue(): Observable<number> {
-    return this.elevationService.getElevation(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value);
+    return this.elevationService.getElevation(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value, this.elevationProvider);
   }
 
   /**
