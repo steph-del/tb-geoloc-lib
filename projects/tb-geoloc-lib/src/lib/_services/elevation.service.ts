@@ -16,8 +16,8 @@ export class ElevationService {
   }
 
   getElevation(lat: number, lng: number, provider: string): Observable<number> {
-    if (provider === 'openElevation') { return this.getOpenElevation(lat, lng); }
-    if (provider === 'mapQuest' && this.mapQuestApiKey !== null) { return this.getMapQuestElevation(lat, lng); }
+    if (provider.toLowerCase() === 'openelevation') { return this.getOpenElevation(lat, lng); }
+    if (provider.toLowerCase() === 'mapquest' && this.mapQuestApiKey !== null) { return this.getMapQuestElevation(lat, lng); }
     return of(-1);
   }
 

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, empty, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NominatimObject } from '../_models/nominatimObj.model';
-import { OsmPlaceModel } from '../_models/osmPlace.model';
+import { OsmPlaceModel, MapQuestPlaceModel } from '../_models/osmPlace.model';
 import { isDefined } from '@angular/compiler/src/util';
 
 @Injectable({
@@ -18,17 +18,56 @@ export class GeocodingService {
     if (apiKey !== null) { this.mapQuestApiKey = apiKey; }
   }
 
-  geocode(address: string): Observable<any> {
+  geocode(address: string, provider: string): Observable<any> {
     if (address === null) { return empty(); } // Avoid sending request on form reset
-    const url = `https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
-    return this.http.get(url).pipe(
+    if (provider.toLowerCase() === 'osm') { return this.geocodeUsingOSM(address); }
+    if (provider.toLowerCase() === 'mapquest') { return this.geocodeUsingMapQuest(address); }
+  }
+
+  reverse(lat: number, lng: number, provider: string): Observable<any> {
+    if (provider.toLowerCase() === 'osm') { return this.reverseUsingOSM(lat, lng); }
+    if (provider.toLowerCase() === 'mapquest') { return this.reverseUsingMapQuest(lat, lng); }
+  }
+
+  /**
+   * Get an human readable address
+   * @param results OsmPlaceModel | MapQuestPlaceModel
+   */
+  getReadbleAddress(results: any, provider: string): string {
+    if (provider.toLowerCase() === 'osm') { return this.getNominatimReadbleAddress(results); }
+    if (provider.toLowerCase() === 'mapquest') {
+      if (isDefined(results.results)) {
+        return this.getMapQuestReadableAddress(results);    // MapQuest geocoding returns an OsmPlaceModel object
+      } else if (isDefined(results.address)) {
+        return this.getNominatimReadbleAddress(results);    // MapQuest reverse geocoding returns a MapQuestPlaceModel object
+      }
+    }
+  }
+
+  geocodeUsingOSM(address: string): Observable<any> {
+    const apiUrl = `https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
+    return this.http.get(apiUrl).pipe(
       map((obj: NominatimObject) => obj)
     );
   }
 
-  reverse(lat: number, lng: number): Observable<any> {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&polygon_geojson=1`;
-    return this.http.get(url).pipe(
+  geocodeUsingMapQuest(address: string): Observable<any> {
+    const apiUrl = `http://open.mapquestapi.com/nominatim/v1/search.php?key=${this.mapQuestApiKey}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
+    return this.http.get(apiUrl).pipe(
+      map((obj: NominatimObject) => obj)
+    );
+  }
+
+  reverseUsingOSM(lat: number, lng: number): Observable<any> {
+    const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&polygon_geojson=1`;
+    return this.http.get(apiUrl).pipe(
+      map((obj: NominatimObject) => obj)
+    );
+  }
+
+  reverseUsingMapQuest(lat: number, lng: number): Observable<any> {
+    const apiUrl = `http://open.mapquestapi.com/geocoding/v1/reverse?key=${this.mapQuestApiKey}&location=${lat},${lng}`;
+    return this.http.get(apiUrl).pipe(
       map((obj: NominatimObject) => obj)
     );
   }
@@ -37,7 +76,7 @@ export class GeocodingService {
    * Nominatim returns a lot of data... not always the same data
    * We only want structured data to be shown to the user : a readbale address here
    */
-  getReadbleAddress(osmPlaceResult: OsmPlaceModel): string {
+  getNominatimReadbleAddress(osmPlaceResult: OsmPlaceModel): string {
     let locality: string = null;    // city or village or ...
     let subLocality: string = null; // district or
     let road: string = null;
@@ -73,6 +112,8 @@ export class GeocodingService {
       return road + ' (' + neighbourhood + ') ' + subLocality + ' ' + locality;
     } else if (road && !neighbourhood && subLocality && locality) {
       return road + ' ' + subLocality + ' ' + locality;
+    } else if (road && !neighbourhood && !subLocality && locality) {
+      return road + ', ' + locality;
     } else if (!road && neighbourhood && subLocality && locality) {
       return neighbourhood + ' ' + subLocality + ' ' + locality;
     } else if (!road && !neighbourhood && subLocality && locality) {
@@ -83,6 +124,39 @@ export class GeocodingService {
       return osmPlaceResult.display_name;
     }
 
+  }
+
+  /**
+   * Create a readable address from mapQuest result
+   * see https://developer.mapquest.com/documentation/open/geocoding-api/reverse/get/
+   */
+  getMapQuestReadableAddress(mapQuestResult: any): string {
+    const MQR = mapQuestResult.results[0].locations[0];
+
+    let locality: string = null;    // city or village or ...
+    let subLocality: string = null; // district or
+    let road: string = null;
+    let neighbourhood: string = null;
+
+    locality = MQR.adminArea5;
+    subLocality = MQR.adminArea4;
+    road = MQR.street;
+    neighbourhood = MQR.adminArea6;
+
+    // Return
+    if (road && neighbourhood && subLocality && locality) {
+      return road + ' (' + neighbourhood + ') ' + subLocality + ' ' + locality;
+    } else if (road && !neighbourhood && subLocality && locality) {
+      return road + ' ' + subLocality + ' ' + locality;
+    } else if (road && !neighbourhood && !subLocality && locality) {
+      return road + ', ' + locality;
+    } else if (!road && neighbourhood && subLocality && locality) {
+      return neighbourhood + ' ' + subLocality + ' ' + locality;
+    } else if (!road && !neighbourhood && subLocality && locality) {
+      return subLocality + ' ' + locality;
+    } else if (!road && !neighbourhood && !subLocality && locality) {
+      return locality;
+    }
   }
 
   /**
