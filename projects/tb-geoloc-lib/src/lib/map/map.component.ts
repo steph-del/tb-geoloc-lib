@@ -42,6 +42,9 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = true;
+  @Input() set reset(value: boolean) {
+    if (value === true) { this.resetComponent(); }
+  }
 
   @Input() elevationProvider: 'openElevation' | 'mapQuest' = 'openElevation';
   @Input() geolocationProvider: 'osm' | 'mapQuest' = 'osm';
@@ -666,10 +669,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this.latlngFormGroup.controls.lngInput.setValue('', {emitEvent: false});
     this.latlngFormGroup.controls.dmsLatInput.setValue('', {emitEvent: false});
     this.latlngFormGroup.controls.dmsLngInput.setValue('', {emitEvent: false});
-    this.latlngFormGroup.reset();
+    this.latlngFormGroup.reset('', {emitEvent: false});
 
     this.elevationFormGroup.controls.elevationInput.setValue('', {emitEvent: false});
-    this.elevationFormGroup.reset();
+    this.elevationFormGroup.reset('', {emitEvent: false});
 
     this.geoSearchFormGroup.controls.placeInput.setValue('', {emitEvent: false});
   }
@@ -692,7 +695,7 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    */
   resetLocation() {
-    this.location = null;
+    this._location = <LocationModel>{};
   }
 
   /**
@@ -797,6 +800,15 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // clear geolocated photos layer
     this.geolocatedPhotoLatLngLayer.clearLayers();
+  }
+
+  resetComponent() {
+    this.clearForm();
+    this.resetLocation();
+    this.clearGeoResultsLayer();
+    this.clearDrawnItemsLayer();
+    this.setMapDrawMode();
+    this.map.flyTo({ lat: this.latLngInit[0], lng: this.latLngInit[1] }, this.zoomInit, {animate: false});
   }
 
 }

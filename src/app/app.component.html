@@ -1,6 +1,7 @@
 <tb-geoloc-map
   [geolocatedPhotoLatLng]=testLatLngData
   [layersToAdd]="layers"
+  [reset]="_reset"
   elevationProvider="mapQuest"
   geolocationProvider="osm"
   [mapQuestApiKey]="mapQuestApiKey"
@@ -9,3 +10,5 @@
 
 <br /><br /><br />
 <div (click)="emitLatLngData()">Simuler l'import de photos géolocalisées</div>
+<br />
+<p (click)="reset()">RESET</p>

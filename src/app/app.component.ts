@@ -9,6 +9,7 @@ export class AppComponent {
   testLatLngData: any;
   layers = ['osm', 'google hybrid', 'brgm', 'opentopomap'];
   mapQuestApiKey = 'ApIFfQWsb8jW6bkYDD2i0Sq5BD9moJ3l';
+  _reset = false;
 
   public locationChange(data) {
     console.log(data);
@@ -39,6 +40,13 @@ export class AppComponent {
     console.log('app emit gps data...');
     this.testLatLngData = data;
     // this.testLatLngData.next(data);
+  }
+
+  public reset() {
+    this._reset = true;
+    setTimeout(() => {
+      this._reset = false;
+    }, 100);
   }
 }
 
