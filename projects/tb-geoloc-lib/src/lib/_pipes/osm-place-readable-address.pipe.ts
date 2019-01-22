@@ -14,8 +14,8 @@ export class OsmPlaceReadableAddressPipe implements PipeTransform {
 
   constructor(private geocodeService: GeocodingService) { }
 
-  transform(value: OsmPlaceModel, args?: any): string {
-    return this.geocodeService.getReadbleAddress(value);
+  transform(value: OsmPlaceModel, args?: string): string {
+    return this.geocodeService.getReadbleAddress(value, args);
   }
 
 }

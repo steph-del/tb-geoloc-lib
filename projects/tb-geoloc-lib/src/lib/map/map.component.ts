@@ -43,6 +43,13 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = true;
+  @Input() set reset(value: boolean) {
+    if (value === true) { this.resetComponent(); }
+  }
+
+  @Input() elevationProvider: 'openElevation' | 'mapQuest' = 'openElevation';
+  @Input() geolocationProvider: 'osm' | 'mapQuest' = 'osm';
+  @Input() mapQuestApiKey: string;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -117,6 +124,9 @@ export class MapComponent implements OnInit, OnDestroy {
    * - Set up subscriptions (geo search, geolocated photos, lat / lng inputs)
    */
   ngOnInit() {
+    // Init API
+    this.initApi();
+
     // Create forms
     this.latlngFormGroup = this.fb.group({
       latInput: this.fb.control('', [Validators.required, this.latLngDecValidator]),
@@ -140,7 +150,7 @@ export class MapComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       switchMap(value => {
         this.isLoadingAddress = true;
-        return this.geocodeService.geocode(value);
+        return this.geocodeService.geocode(value, this.geolocationProvider);
       })
     ).subscribe(results => {
       this.isLoadingAddress = false;
@@ -251,6 +261,13 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * API initialization
+   */
+  initApi() {
+    this.elevationService.setMapQuestApiKey(this.mapQuestApiKey);
+    this.geocodeService.setMapQuestApiKey(this.mapQuestApiKey);
+  }
   /**
    * Unsubscribe
    */
@@ -507,7 +524,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
       // Patch place input value
       if (!avoidCallingGeolocApi) {
-        this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace), {emitEvent: false});
+        this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace, this.geolocationProvider), {emitEvent: false});
       }
 
       // callback ?
@@ -555,14 +572,14 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    */
   getElevationFromInputValue(): Observable<number> {
-    return this.elevationService.getElevation(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value);
+    return this.elevationService.getElevation(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value, this.elevationProvider);
   }
 
   /**
    * Reverse geocoding from lat / lng inputs values
    */
   reverseGeocodingFromInputValue(): Observable<any> {
-    return this.geocodeService.reverse(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value);
+    return this.geocodeService.reverse(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value, this.geolocationProvider);
   }
 
   /**
@@ -603,7 +620,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.flyToGeoResultsItems();
 
     // Patch input value
-    this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace), {emitEvent: false});
+    this.geoSearchFormGroup.controls.placeInput.patchValue(this.geocodeService.getReadbleAddress(osmPlace, this.geolocationProvider), {emitEvent: false});
     // Fill latitude, longitude & altitude inputs
     const g = new GeoPoint(Number(osmPlace.lon), Number(osmPlace.lat));
     this.latlngFormGroup.controls.latInput.setValue(osmPlace.lat, {emitEvent: false});
@@ -653,10 +670,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this.latlngFormGroup.controls.lngInput.setValue('', {emitEvent: false});
     this.latlngFormGroup.controls.dmsLatInput.setValue('', {emitEvent: false});
     this.latlngFormGroup.controls.dmsLngInput.setValue('', {emitEvent: false});
-    this.latlngFormGroup.reset();
+    this.latlngFormGroup.reset('', {emitEvent: false});
 
     this.elevationFormGroup.controls.elevationInput.setValue('', {emitEvent: false});
-    this.elevationFormGroup.reset();
+    this.elevationFormGroup.reset('', {emitEvent: false});
 
     this.geoSearchFormGroup.controls.placeInput.setValue('', {emitEvent: false});
   }
@@ -679,7 +696,7 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    */
   resetLocation() {
-    this.location = null;
+    this._location = <LocationModel>{};
   }
 
   /**
@@ -691,43 +708,70 @@ export class MapComponent implements OnInit, OnDestroy {
     // if elevation = 0 or null ?
     // if osm data incomplete ?
     let elevation: any;
-    let osmPlace: any;
+    let place: any;
     if (Array.isArray(data)) {
       elevation = data[0];
-      osmPlace = data[1];
+      place = data[1];
     } else {
       elevation = this.elevationFormGroup.controls.elevationInput.value;
-      osmPlace = data;
+      place = data;
     }
-    this._location.geometry = this.drawnItems.toGeoJSON();
+    const geom: any = this.drawnItems.toGeoJSON();
+    this._location.geometry = geom.features[0].geometry;
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
     this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
     // published_location : Précision géographique à laquelle est publiée l'obs, permet de gérer le floutage - Précise, Localité, Maille 10x10km
 
-    this._location.osmCountry = osmPlace.address.country;
-    this._location.osmCountryCode = osmPlace.address.country_code;
-    this._location.osmCounty = osmPlace.address.county;
-    this._location.osmPostcode = osmPlace.address.postcode;
-    if (osmPlace.address.city) { this._location.locality = osmPlace.address.city; }
-    if (osmPlace.address.town) { this._location.locality = osmPlace.address.town; }
-    if (osmPlace.address.village) { this._location.locality = osmPlace.address.village; }
 
-    this._location.sublocality = osmPlace.hamlet;
+    // OSM place
+    if (isDefined(place.address)) {
+      this._location.osmCountry = place.address.country;
+      this._location.osmCountryCode = place.address.country_code;
+      this._location.osmCounty = place.address.county;
+      this._location.osmPostcode = place.address.postcode;
+      if (place.address.city) { this._location.locality = place.address.city; }
+      if (place.address.town) { this._location.locality = place.address.town; }
+      if (place.address.village) { this._location.locality = place.address.village; }
 
-    this._location.osmRoad = osmPlace.address.road;
-    this._location.osmState = osmPlace.address.state;
-    this._location.osmSuburb = osmPlace.address.suburb;
+      this._location.sublocality = place.hamlet;
 
-    this._location.osmId = osmPlace.osm_id;
-    this._location.osmNeighbourhood = null;      // not provided by nominatim
-    this._location.osmPlaceId = osmPlace.place_id;
-    this._location.publishedLocation = null;     // perform
-    this._location.station = null;               // perform
+      this._location.osmRoad = place.address.road;
+      this._location.osmState = place.address.state;
+      this._location.osmSuburb = place.address.suburb;
 
-    // Verifications
-    // @todo
+      this._location.osmId = place.osm_id;
+      this._location.osmNeighbourhood = null;      // not provided by nominatim
+      this._location.osmPlaceId = place.place_id;
+      this._location.publishedLocation = null;     // perform
+      this._location.station = null;               // perform
+
+      // Verifications
+      // @todo
+    }
+
+    // MapQuest place
+    if (isDefined(place.results)) {
+      const mapQuestResult = place.results[0].locations[0];
+      this._location.osmCountry = mapQuestResult.adminArea1;
+      this._location.osmCountryCode = mapQuestResult.adminArea1;
+      this._location.osmCounty = mapQuestResult.adminArea4;
+      this._location.osmPostcode = mapQuestResult.postalCode;
+      this._location.locality = mapQuestResult.adminArea5;
+
+      this._location.sublocality = null;
+
+      this._location.osmRoad = mapQuestResult.street;
+      this._location.osmState = mapQuestResult.adminArea3;
+      this._location.osmSuburb = null;
+
+      this._location.osmId = null;
+      this._location.osmNeighbourhood = mapQuestResult.adminArea6;
+      this._location.osmPlaceId = null;
+      this._location.publishedLocation = null;     // perform
+      this._location.station = null;               // perform
+    }
 
     // Emit
     this.location.next(this._location);
@@ -758,6 +802,15 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // clear geolocated photos layer
     this.geolocatedPhotoLatLngLayer.clearLayers();
+  }
+
+  resetComponent() {
+    this.clearForm();
+    this.resetLocation();
+    this.clearGeoResultsLayer();
+    this.clearDrawnItemsLayer();
+    this.setMapDrawMode();
+    this.map.flyTo({ lat: this.latLngInit[0], lng: this.latLngInit[1] }, this.zoomInit, {animate: false});
   }
 
 }
