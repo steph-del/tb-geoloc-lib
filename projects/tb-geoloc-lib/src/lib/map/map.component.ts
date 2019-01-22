@@ -715,7 +715,8 @@ export class MapComponent implements OnInit, OnDestroy {
       elevation = this.elevationFormGroup.controls.elevationInput.value;
       place = data;
     }
-    this._location.geometry = this.drawnItems.toGeoJSON();
+    const geom: any = this.drawnItems.toGeoJSON();
+    this._location.geometry = geom.features[0].geometry;
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
