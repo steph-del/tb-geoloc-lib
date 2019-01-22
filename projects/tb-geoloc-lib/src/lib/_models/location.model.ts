@@ -1,3 +1,5 @@
+import { InseeCommune } from './inseeCommune.model';
+
 /**
  * Location model
  * Based on OSM fields
@@ -25,4 +27,6 @@ export interface LocationModel {
   osmSuburb: string;
   osmId: number;
   osmPlaceId: number;
+
+  inseeData: InseeCommune;
 }

@@ -100,6 +100,7 @@ LocationModel :
 | osmSuburb           | string                           | 
 | osmId               | number                           | 
 | osmPlaceId          | number                           | 
+| inseeData           | InseeCommune                     | voir le model "Commune" : https://api.gouv.fr/api/api-geo.html#doc_tech
 
 ## Serveur de développement
 

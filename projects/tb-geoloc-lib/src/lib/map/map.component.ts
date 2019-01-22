@@ -18,6 +18,7 @@ import { ElevationService } from '../_services/elevation.service';
 import { LocationModel } from '../_models/location.model';
 import { NominatimObject } from '../_models/nominatimObj.model';
 import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
+import { InseeCommune } from '../_models/inseeCommune.model';
 
 @Component({
   selector: 'tb-geoloc-map',
@@ -66,6 +67,7 @@ export class MapComponent implements OnInit, OnDestroy {
   // ---------
   _location = <LocationModel>{};
   osmPlace: any = null;
+  inseeData: InseeCommune = null;
   _geolocatedPhotoLatLng: EventEmitter<Array<LatLngDMSAltitudePhotoName>> = new EventEmitter();
   geolocatedPhotoLatLngData: Array<LatLngDMSAltitudePhotoName> = [];
   geolocatedPhotoLatLngDisplayedColumnsTable: Array<string> = ['select', 'fileName', 'lat', 'lng', 'altitude'];
@@ -211,7 +213,7 @@ export class MapComponent implements OnInit, OnDestroy {
     ).subscribe(result => {
       if (this.osmPlace !== null) {
         const elevation = result;
-      this.bindLocationOutput([elevation, this.osmPlace]);
+      this.bindLocationOutput([elevation, this.osmPlace, this.inseeData]);
       }
     });
 
@@ -478,20 +480,29 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   callGeolocElevationApisUsingLatLngInputsValues(avoidCallingElevationApi = false, avoidCallingGeolocApi = false, callback?: Function): void {
     this.osmPlace = null;
+    this.inseeData = null;
     this.setLatLngInputFromDrawnItems();
     this.setLatLngDmsInputFromDrawnItems();
     let httpTasks: Observable<any>;
     let elevation: any;
     let osmPlace: any;
+    let inseeData: InseeCommune;
 
     if (avoidCallingElevationApi && !avoidCallingGeolocApi) {
-      httpTasks = this.reverseGeocodingFromInputValue();
+      httpTasks = zip(
+        this.reverseGeocodingFromInputValue(),
+        this.geocodeService.getInseeData(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value)
+      );
     } else if (avoidCallingGeolocApi && !avoidCallingElevationApi) {
-      httpTasks = this.getElevationFromInputValue();
+      httpTasks = zip(
+        this.getElevationFromInputValue(),
+        this.geocodeService.getInseeData(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value)
+      );
     } else if (!avoidCallingElevationApi && !avoidCallingGeolocApi) {
       httpTasks = zip(
         this.getElevationFromInputValue(),
-        this.reverseGeocodingFromInputValue()
+        this.reverseGeocodingFromInputValue(),
+        this.geocodeService.getInseeData(this.latlngFormGroup.controls.latInput.value, this.latlngFormGroup.controls.lngInput.value)
       );
     } else if (avoidCallingElevationApi && avoidCallingGeolocApi) {
       // nothing to do ; throw or log an error ?
@@ -507,16 +518,20 @@ export class MapComponent implements OnInit, OnDestroy {
       this.isLoadingAddress = false;
       if (avoidCallingElevationApi && !avoidCallingGeolocApi) {
         elevation = null;
-        osmPlace = result;
+        osmPlace = result[0];
+        inseeData = result[1];
       } else if (avoidCallingGeolocApi && !avoidCallingElevationApi) {
         elevation = result;
         osmPlace = null;
-        elevation = result;
+        elevation = result[0];
+        inseeData = result[1];
       } else if (!avoidCallingGeolocApi && !avoidCallingGeolocApi) {
         elevation = result[0];
         osmPlace = result[1];
+        inseeData = result[2];
       }
       this.osmPlace = osmPlace;
+      this.inseeData = inseeData;
 
       // Set elevation input
       if (!avoidCallingElevationApi) { this.elevationFormGroup.controls.elevationInput.setValue(elevation, {emitEvent: false}); }
@@ -531,11 +546,12 @@ export class MapComponent implements OnInit, OnDestroy {
         callback(elevation, osmPlace);
       } else {
         // bind _location & emit location
-        if (avoidCallingElevationApi) {
-          this.bindLocationOutput([this.elevationFormGroup.controls.elevationInput.value, osmPlace]);
+        this.bindLocationOutput([elevation, osmPlace, inseeData]);
+        /*if (avoidCallingElevationApi) {
+          this.bindLocationOutput([this.elevationFormGroup.controls.elevationInput.value, osmPlace, inseeData]);
         } else {
-          this.bindLocationOutput(result);
-        }
+          this.bindLocationOutput(result[]);
+        }*/
       }
 
     }, error => {
@@ -701,26 +717,26 @@ export class MapComponent implements OnInit, OnDestroy {
   /**
    * Bind data from elevation and OSM http results to this._location
    * Perform some verifications to ensure data integrity
-   * @param data data[0] = elevation, data[1] = osm data | data = osm data
+   * @param data data[0] = elevation, data[1] = osm data, data[2] = insee data
    */
   bindLocationOutput(data: Array<any> | any): void {
     // if elevation = 0 or null ?
     // if osm data incomplete ?
     let elevation: any;
     let place: any;
-    if (Array.isArray(data)) {
-      elevation = data[0];
-      place = data[1];
-    } else {
-      elevation = this.elevationFormGroup.controls.elevationInput.value;
-      place = data;
-    }
+    let inseeData: InseeCommune;
+
+    elevation = data[0];
+    place = data[1];
+    inseeData = data[2];
+
     const geom: any = this.drawnItems.toGeoJSON();
     this._location.geometry = geom.features[0].geometry;
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
     this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
+    this._location.inseeData = inseeData;
     // published_location : Précision géographique à laquelle est publiée l'obs, permet de gérer le floutage - Précise, Localité, Maille 10x10km
 
 
