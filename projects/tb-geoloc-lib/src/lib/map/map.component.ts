@@ -37,8 +37,8 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() osmClassFilter: Array<string> = [];
   @Input() allowEditDrawnItems = false;
   @Input() marker = true;
-  @Input() polyline = true;
-  @Input() polygon = true;
+  @Input() polyline = false;
+  @Input() polygon = false;
   @Input() latLngInit = [46.55886030, 2.98828125];
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
@@ -47,9 +47,9 @@ export class MapComponent implements OnInit, OnDestroy {
     if (value === true) { this.resetComponent(); }
   }
 
-  @Input() elevationProvider: 'openElevation' | 'mapQuest' = 'openElevation';
-  @Input() geolocationProvider: 'osm' | 'mapQuest' = 'osm';
-  @Input() mapQuestApiKey: string;
+  @Input() elevationProvider = 'mapQuest';
+  @Input() geolocationProvider = 'osm';
+  @Input() mapQuestApiKey = 'KpzlEtCq6BmVVf37R1EXV3jWoh20ynCc';
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 

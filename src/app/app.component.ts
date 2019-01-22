@@ -19,10 +19,8 @@ export class AppComponent {
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = false;
+  @Input() mapQuestApiKey = 'mG6oU5clZHRHrOSnAV0QboFI7ahnGg34';
   testLatLngData: any;
-  layers = ['osm', 'google hybrid', 'brgm', 'opentopomap'];
-  mapQuestApiKey = 'ApIFfQWsb8jW6bkYDD2i0Sq5BD9moJ3l';
-  _reset = false;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -30,12 +28,5 @@ export class AppComponent {
 
   newLocation(data) {
     this.location.emit(data);
-  }
-
-  public reset() {
-    this._reset = true;
-    setTimeout(() => {
-      this._reset = false;
-    }, 100);
   }
 }

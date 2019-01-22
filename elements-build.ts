@@ -1,4 +1,5 @@
 // to build the app :
+// npm run build_lib
 // ng build --prod --output-hashing none && node elements-build.ts
 
 const fs = require('fs-extra');
