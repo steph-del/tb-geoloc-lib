@@ -2,6 +2,11 @@
   [geolocatedPhotoLatLng]=testLatLngData
   [layersToAdd]="layers"
   [reset]="_reset"
+  [patchAddress]="patchAddress"
+  [patchElevation]="patchElevation"
+  [patchLatLngDec]="patchLatLngDec"
+  [drawMarker]="drawMarker"
+  [patchGeometry]="patchGeometry"
   elevationProvider="mapQuest"
   geolocationProvider="osm"
   [mapQuestApiKey]="mapQuestApiKey"
@@ -12,3 +17,9 @@
 <div (click)="emitLatLngData()">Simuler l'import de photos géolocalisées</div>
 <br />
 <p (click)="reset()">RESET</p>
+<p (click)="testPatchAddress()">TEST patch adresse</p>
+<p (click)="testPatchElevation()">TEST patch altitude</p>
+<p (click)="testPatchLatLngDec()">TEST patch lat/lng</p>
+<p (click)="testDrawMarker()">TEST draw marker</p>
+<p (click)="testPatchGeometry()">TEST patch geometry</p>
+<p (click)="testPatchGeometry2()">TEST patch geometry ++</p>

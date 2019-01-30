@@ -51,6 +51,22 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() geolocationProvider: 'osm' | 'mapQuest' = 'osm';
   @Input() mapQuestApiKey: string;
 
+  @Input() set patchAddress(value: string) {
+    if (value && value !== null) { this._patchAddress(value); }
+  }
+  @Input() set patchElevation(value: any) {
+    if (value && value !== null) { this._patchElevation(value); }
+  }
+  @Input() set patchLatLngDec(value: [number, number]) {
+    if (value && value !== null) { this._patchLatLngDec(value[0], value[1]); }
+  }
+  @Input() set patchGeometry(value: Array<{coordinates: Array<number>, type: string}>) {
+    if (value && value !== null) { this._patchGeometry(value); }
+  }
+  @Input() set drawMarker(value: [number, number]) {
+    if (value && value !== null) { this._drawMarker(value[0], value[1]); }
+  }
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
   // -------------------------
@@ -828,4 +844,109 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.flyTo({ lat: this.latLngInit[0], lng: this.latLngInit[1] }, this.zoomInit, {animate: false});
   }
 
+  /**
+   * Set address whitout emitting events
+   */
+  _patchAddress(address: string): void {
+    this.geoSearchFormGroup.controls.placeInput.setValue(address, {emitEvent: false});
+  }
+
+  /**
+   * Set elevation whitout emitting events
+   */
+  _patchElevation(elevation: any): void {
+    this.elevationFormGroup.controls.elevationInput.setValue(elevation, {emitEvent: false} );
+  }
+
+  /**
+   * Set lat lng decimal whitout emitting events
+   * And calculate + set lat lng DMS automaticaly
+   */
+  _patchLatLngDec(lat: number, lng: number): void {
+    this.latlngFormGroup.controls.latInput.setValue(lat, {emitEvent: false} );
+    this.latlngFormGroup.controls.lngInput.setValue(lng, {emitEvent: false} );
+
+    const geopoint = new GeoPoint(lng, lat);
+    this.latlngFormGroup.controls.dmsLatInput.patchValue(geopoint.getLatDeg());
+    this.latlngFormGroup.controls.dmsLngInput.patchValue(geopoint.getLonDeg());
+  }
+
+  /**
+   * Set lat lng decimal and DMS whitout emitting events
+   * Draw a marker
+   * Call geosearch and elevation API and fill associate inputs
+   */
+  _drawMarker(lat: number, lng: number): void {
+    this.latlngFormGroup.controls.latInput.setValue(lat, {emitEvent: false} );
+    this.latlngFormGroup.controls.lngInput.setValue(lng, {emitEvent: false} );
+
+    const geopoint = new GeoPoint(lng, lat);
+    this.latlngFormGroup.controls.dmsLatInput.patchValue(geopoint.getLatDeg());
+    this.latlngFormGroup.controls.dmsLngInput.patchValue(geopoint.getLonDeg());
+
+    this.addMarkerFromLatLngCoord();
+    this.callGeolocElevationApisUsingLatLngInputsValues();
+  }
+
+  /**
+   * Draw items on drawnItem
+   */
+  _patchGeometry(value: Array<{coordinates: Array<number>, type: string}>) {
+    this.clearDrawnItemsLayer();
+
+    for (const item of value) {
+      // point
+      if (item.type.toLowerCase() === 'point') {
+        const latLng = L.latLng(item.coordinates[0], item.coordinates[1]);
+        let m: any;
+        if (value.length === 1) {
+          // add a draggable marker
+          m = leafletObjects.draggableMarker(item.coordinates[0], item.coordinates[1], (/* dragEnd function */) => {
+            this.zone.run(() => {
+              this.callGeolocElevationApisUsingLatLngInputsValues();
+            });
+          });
+        } else if (value.length > 1) {
+          m = new L.Marker(latLng, {icon: leafletObjects.simpleIconMarker()});
+        }
+        m.addTo(this.drawnItems);
+      }
+
+      // lineString
+      if (item.type.toLowerCase() === 'linestring') {
+        const coords: any = [];
+        for (const c of item.coordinates) {
+          coords.push(new L.LatLng(c[0], c[1]));
+        }
+        const m = new L.Polyline(coords);
+        m.addTo(this.drawnItems);
+      }
+
+      // polygon
+      if (item.type.toLowerCase() === 'polygon') {
+        const coords: any = [];
+        for (const c of item.coordinates) {
+          coords.push(new L.LatLng(c[0], c[1]));
+        }
+        const m = new L.Polygon(coords);
+        m.addTo(this.drawnItems);
+      }
+    }
+    this.setMapEditMode();
+    this.flyToDrawnItems();
+  }
+
 }
+
+
+/*
+        const _latDms = data.lat.deg + '° ' + data.lat.min + '\'' + data.lat.sec + '"';
+        const _lngDms = data.lng.deg + '° ' + data.lng.min + '\'' + data.lng.sec + '"';
+        const g = new GeoPoint(_lngDms, _latDms);
+        data.latDec = g.latDec;
+        data.lngDec = g.lonDec;
+
+        // Create the marker
+        const latLng = L.latLng(data.latDec, data.lngDec);
+        const gpsPhotoMarker = new L.Marker(latLng, { icon: leafletObjects.gpsPhotoMarkerIcon() });
+*/

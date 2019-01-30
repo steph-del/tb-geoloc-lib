@@ -10,6 +10,11 @@ export class AppComponent {
   layers = ['osm', 'google hybrid', 'brgm', 'opentopomap'];
   mapQuestApiKey = 'ApIFfQWsb8jW6bkYDD2i0Sq5BD9moJ3l';
   _reset = false;
+  patchAddress: string;
+  patchElevation: number;
+  patchLatLngDec: [number, number];
+  drawMarker: [number, number];
+  patchGeometry: any;
 
   public locationChange(data) {
     console.log(data);
@@ -47,6 +52,58 @@ export class AppComponent {
     setTimeout(() => {
       this._reset = false;
     }, 100);
+  }
+
+  public testPatchAddress() {
+    this.patchAddress = 'Une super adresse !';
+    setTimeout(() => { this.patchAddress = null; }, 100);
+  }
+
+  public testPatchElevation() {
+    this.patchElevation = 1000;
+    setTimeout(() => { this.patchElevation = null; }, 100);
+  }
+
+  public testPatchLatLngDec() {
+    this.patchLatLngDec = [44, 2];
+  }
+
+  public testDrawMarker() {
+    this.drawMarker = [44.0, 2.1];
+  }
+
+  public testPatchGeometry() {
+    this.patchGeometry = [
+      {
+        type: 'Point',
+        coordinates: [44, 1]
+      }
+    ];
+  }
+
+  public testPatchGeometry2() {
+    this.patchGeometry = [
+      {
+        type: 'Point',
+        coordinates: [44, 1]
+      },
+      {
+        type: 'Point',
+        coordinates: [44.1, 1.1]
+      },
+      {
+        type: 'LineString',
+        coordinates: [
+          [44, 1], [44.1, 1.1], [44.2, 1]
+        ]
+      },
+      {
+        type: 'Polygon',
+        coordinates: [
+          [44, 0.9], [44, 1], [43.9, 0.9], [43.9, 1]
+        ]
+      }
+    ];
   }
 }
 
