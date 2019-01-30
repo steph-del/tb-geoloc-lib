@@ -22,9 +22,9 @@ export interface LocationModel {
   osmCountryCode: string;
   osmCounty: string;
   osmPostcode: number;
-  osmRoad: string;
-  osmNeighbourhood: string;
-  osmSuburb: string;
+  osmRoad?: string;
+  osmNeighbourhood?: string;
+  osmSuburb?: string;
   osmId: number;
   osmPlaceId: number;
 
