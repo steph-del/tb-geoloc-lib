@@ -54,14 +54,11 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | zoomInit                  |        | `number`   |          | 4                | Zoom au démarrage de la carte (min et max peuvent dépendre des capacités de la couche affichée par défaut) |
 | getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
 | showLatLngElevationInputs |        | boolean  |          | true             | Affiche les champs de latitude, longitude et altitude. Si false, les données lat, long et altitude sont affichées sous forme de texte et sous la carte.
-
 | patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
 | patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
 | patchLatLngDec            |        | `[number, number]` ([latitude, longitude])  |    |                  | rempli les champs 'latitude' et 'mongitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |
 | patchGeometry             |        | `Array<{type: string, coordinates: Array<[number, number]>}>` | | | dessine un ou plusieurs points, polylignes ou polygones. Si seul un point est passé en paramètre, c'est un marqueur déplaçable qui est dessiné. l'auto-completion (API) n'est pas exécutée. |
 | drawMarker                |        | `[number, number]` ([latitude, longitude])  |          |                  | dessine un marker (avec autocompletion de l'adresse et de l'altitude) |
-
-
 | reset                     |        | boolean  |          | false            | RAZ du composant si true |
 
 Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
