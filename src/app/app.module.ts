@@ -14,11 +14,11 @@ import { TbGeolocLibModule, MapComponent } from 'tb-geoloc-lib';
     TbGeolocLibModule
   ],
   providers: [],
-  entryComponents: [MapComponent]
+  entryComponents: [AppComponent]
 })
 export class AppModule {
   constructor(private injector: Injector) {
-    const elm = createCustomElement(MapComponent, { injector: this.injector });
+    const elm = createCustomElement(AppComponent, { injector: this.injector });
     customElements.define('tb-geolocation-element', elm);
   }
   ngDoBootstrap() { }
