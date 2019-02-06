@@ -43,17 +43,22 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 
 | Paramètre                 | Requis | Type     | Valeurs | Valeur par défaut | Description / Commentaire |
 | ---                       | ---    | ---      | ---     | ---               | ---         |
-| layersToAdd               |        | Array<string>   | 'osm', 'opentopomap', 'google hybrid', 'brgm' | ['osm'] |  |
+| layersToAdd               |        | `Array<string>`   | 'osm', 'opentopomap', 'google hybrid', 'brgm' | ['osm'] |  |
 | geolocatedPhotoLatLng     |        | Un Observable contenant un tableau de `LatLngDMSAltitudePhotoName` | voir le type | - | cet @Input est soumis à souscription. Les données de géolocalisation sont alors utilisables dans le composant. Fonctionne de concert avec le module `tb-dropbox-lib` |
-| osmClassFilter            |        | Array<string> | [Voir les tags OSM](https://github.com/openstreetmap/Nominatim/blob/80df4d3b560f5b1fd550dcf8cdc09a992b69fee0/settings/partitionedtags.def) + [le wiki OSM (ex pour les routes](https://wiki.openstreetmap.org/wiki/Key:highway)) |  | Les paramètres se composent d'une clé et d'une valeur. Ex : 'highway:primary'. On peut utiliser le caractère '*' pour inclure toutes les valeurs de la clé. Ex: 'highway:*'. |
-| allowEditDrawnItems       |        | boolean  |          | false            | Active la possibilté d'éditer l'entité dessinées |
-| marker                    |        | boolean  |          | true             | Permet de dessiner (placer) un marquer           |
-| polygon                   |        | boolean  |          | true             | Permet de dessiner un polygone                   |
-| polyline                  |        | boolean  |          | true             | Permet de dessiner une polyligne                 |
-| latLngInit                |        | [number, number] |  | [46.55886030, 2.98828125] | Centrage de la carte au démarrage       |
-| zoomInit                  |        | number   |          | 4                | Zoom au démarrage de la carte (min et max peuvent dépendre des capacités de la couche affichée par défaut) |
+| osmClassFilter            |        | `Array<string>` | [Voir les tags OSM](https://github.com/openstreetmap/Nominatim/blob/80df4d3b560f5b1fd550dcf8cdc09a992b69fee0/settings/partitionedtags.def) + [le wiki OSM (ex pour les routes](https://wiki.openstreetmap.org/wiki/Key:highway)) |  | Les paramètres se composent d'une clé et d'une valeur. Ex : 'highway:primary'. On peut utiliser le caractère '*' pour inclure toutes les valeurs de la clé. Ex: 'highway:*'. |
+| allowEditDrawnItems       |        | `boolean`  |          | false            | Active la possibilté d'éditer l'entité dessinées |
+| marker                    |        | `boolean`  |          | true             | Permet de dessiner (placer) un marquer           |
+| polygon                   |        | `boolean`  |          | true             | Permet de dessiner un polygone                   |
+| polyline                  |        | `boolean`  |          | true             | Permet de dessiner une polyligne                 |
+| latLngInit                |        | `[number, number]` ([latitude, longitude]) |  | [46.55886030, 2.98828125] | Centrage de la carte au démarrage       |
+| zoomInit                  |        | `number`   |          | 4                | Zoom au démarrage de la carte (min et max peuvent dépendre des capacités de la couche affichée par défaut) |
 | getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
 | showLatLngElevationInputs |        | boolean  |          | true             | Affiche les champs de latitude, longitude et altitude. Si false, les données lat, long et altitude sont affichées sous forme de texte et sous la carte.
+| patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
+| patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
+| patchLatLngDec            |        | `[number, number]` ([latitude, longitude])  |    |                  | rempli les champs 'latitude' et 'mongitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |
+| patchGeometry             |        | `Array<{type: string, coordinates: Array<[number, number]>}>` | | | dessine un ou plusieurs points, polylignes ou polygones. Si seul un point est passé en paramètre, c'est un marqueur déplaçable qui est dessiné. l'auto-completion (API) n'est pas exécutée. |
+| drawMarker                |        | `[number, number]` ([latitude, longitude])  |          |                  | dessine un marker (avec autocompletion de l'adresse et de l'altitude) |
 | reset                     |        | boolean  |          | false            | RAZ du composant si true |
 
 Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
@@ -100,6 +105,7 @@ LocationModel :
 | osmSuburb           | string                           | 
 | osmId               | number                           | 
 | osmPlaceId          | number                           | 
+| inseeData           | InseeCommune                     | voir le model "Commune" : https://api.gouv.fr/api/api-geo.html#doc_tech
 
 ## Serveur de développement
 

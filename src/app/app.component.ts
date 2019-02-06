@@ -24,6 +24,7 @@ export class AppComponent {
   @Input() set show_lat_lng_elevation_inputs(value: string) { if (value === 'true') { this._show_lat_lng_elevation_inputs = true; } }
   @Input() map_quest_api_key = 'mG6oU5clZHRHrOSnAV0QboFI7ahnGg34';
 
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
   _marker: boolean;

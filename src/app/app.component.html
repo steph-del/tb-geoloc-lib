@@ -10,6 +10,17 @@
   [polyline]="_polyline"
   [getOsmSimpleLine]="_get_osm_simple_line"
   [showLatLngElevationInputs]="_show_lat_lng_elevation_inputs"
-  [mapQuestApiKey]="map_quest_api_key"
   (location)="newLocation($event)">
 </tb-geoloc-map>
+
+<!-- to add : 
+  [reset]="_reset"
+  [patchAddress]="patchAddress"
+  [patchElevation]="patchElevation"
+  [patchLatLngDec]="patchLatLngDec"
+  [drawMarker]="drawMarker"
+  [patchGeometry]="patchGeometry"
+  elevationProvider="mapQuest"
+  geolocationProvider="osm"
+  [mapQuestApiKey]="mapQuestApiKey"
+-->

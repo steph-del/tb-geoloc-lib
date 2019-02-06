@@ -4,6 +4,7 @@ import { Observable, empty, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NominatimObject } from '../_models/nominatimObj.model';
 import { OsmPlaceModel, MapQuestPlaceModel } from '../_models/osmPlace.model';
+import { InseeCommune } from '../_models/inseeCommune.model';
 import { isDefined } from '@angular/compiler/src/util';
 
 @Injectable({
@@ -217,8 +218,14 @@ export class GeocodingService {
       return coordinatesArray;
     }
   }
+
+  /**
+   * Get INSEE data (France only)
+   */
+  getInseeData(lat: number, lng: number): Observable<any> {
+    const apiUrl = `https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}`;
+    return this.http.get(apiUrl).pipe(
+      map((obj) => obj[0] as InseeCommune)
+    );
+  }
 }
-
-
-
-
