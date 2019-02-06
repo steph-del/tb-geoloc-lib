@@ -1,7 +1,7 @@
 <tb-geoloc-map
   [layersToAdd]="layers_to_add"
   [geolocatedPhotoLatLng]="geolocated_photo_lat_lng"
-  [osmClassFilter]="osm_class_filter"
+  [osmClassFilter]="_osm_class_filters"
   [allowEditDrawnItems]="allow_edit_drawn_items"
   [latLngInit]="lat_lng_init"
   [zoomInit]="zoom_init"
@@ -10,17 +10,8 @@
   [polyline]="_polyline"
   [getOsmSimpleLine]="_get_osm_simple_line"
   [showLatLngElevationInputs]="_show_lat_lng_elevation_inputs"
+  [elevationProvider]="elevation_provider"
+  [geolocationProvider]="geolocation_provider"
+  [mapQuestApiKey]="map_quest_api_key"
   (location)="newLocation($event)">
 </tb-geoloc-map>
-
-<!-- to add : 
-  [reset]="_reset"
-  [patchAddress]="patchAddress"
-  [patchElevation]="patchElevation"
-  [patchLatLngDec]="patchLatLngDec"
-  [drawMarker]="drawMarker"
-  [patchGeometry]="patchGeometry"
-  elevationProvider="mapQuest"
-  geolocationProvider="osm"
-  [mapQuestApiKey]="mapQuestApiKey"
--->
