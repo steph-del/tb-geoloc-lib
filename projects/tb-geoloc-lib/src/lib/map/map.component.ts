@@ -39,7 +39,7 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() marker = true;
   @Input() polyline = true;
   @Input() polygon = true;
-  @Input() latLngInit = [46.55886030, 2.98828125];
+  @Input() lngLatInit = [2.98828125, 46.55886030]; // inverse OK
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = true;
@@ -57,14 +57,14 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() set patchElevation(value: any) {
     if (value && value !== null) { this._patchElevation(value); }
   }
-  @Input() set patchLatLngDec(value: [number, number]) {
-    if (value && value !== null) { this._patchLatLngDec(value[0], value[1]); }
+  @Input() set patchLngLatDec(value: [number, number]) { // inverse OK
+    if (value && value !== null) { this._patchLatLngDec(value[1], value[0]); }
   }
-  @Input() set patchGeometry(value: Array<{coordinates: Array<number>, type: string}>) {
+  @Input() set patchGeometry(value: Array<{coordinates: Array<number>, type: string}>) { // inverse OK
     if (value && value !== null) { this._patchGeometry(value); }
   }
-  @Input() set drawMarker(value: [number, number]) {
-    if (value && value !== null) { this._drawMarker(value[0], value[1]); }
+  @Input() set drawMarker(value: [number, number]) { // inverse OK
+    if (value && value !== null) { this._drawMarker(value[1], value[0]); }
   }
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
@@ -237,7 +237,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.mapOptions = {
       layers: [],
       zoom: this.zoomInit,
-      center: L.latLng({ lat: this.latLngInit[0], lng: this.latLngInit[1] })
+      center: L.latLng({ lat: this.lngLatInit[1], lng: this.lngLatInit[0] })
     };
 
     // this.allowEditDrawnItems, this.marker, this.polyline & this.polygon are not set until onInit is call
@@ -841,7 +841,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.clearGeoResultsLayer();
     this.clearDrawnItemsLayer();
     this.setMapDrawMode();
-    this.map.flyTo({ lat: this.latLngInit[0], lng: this.latLngInit[1] }, this.zoomInit, {animate: false});
+    this.map.flyTo({ lat: this.lngLatInit[1], lng: this.lngLatInit[0] }, this.zoomInit, {animate: false});
   }
 
   /**
@@ -897,11 +897,11 @@ export class MapComponent implements OnInit, OnDestroy {
     for (const item of value) {
       // point
       if (item.type.toLowerCase() === 'point') {
-        const latLng = L.latLng(item.coordinates[0], item.coordinates[1]);
+        const latLng = L.latLng(item.coordinates[1], item.coordinates[0]);
         let m: any;
         if (value.length === 1) {
           // add a draggable marker
-          m = leafletObjects.draggableMarker(item.coordinates[0], item.coordinates[1], (/* dragEnd function */) => {
+          m = leafletObjects.draggableMarker(item.coordinates[1], item.coordinates[0], (/* dragEnd function */) => {
             this.zone.run(() => {
               this.callGeolocElevationApisUsingLatLngInputsValues();
             });
@@ -916,7 +916,7 @@ export class MapComponent implements OnInit, OnDestroy {
       if (item.type.toLowerCase() === 'linestring') {
         const coords: any = [];
         for (const c of item.coordinates) {
-          coords.push(new L.LatLng(c[0], c[1]));
+          coords.push(new L.LatLng(c[1], c[0]));
         }
         const m = new L.Polyline(coords);
         m.addTo(this.drawnItems);
@@ -926,7 +926,7 @@ export class MapComponent implements OnInit, OnDestroy {
       if (item.type.toLowerCase() === 'polygon') {
         const coords: any = [];
         for (const c of item.coordinates) {
-          coords.push(new L.LatLng(c[0], c[1]));
+          coords.push(new L.LatLng(c[1], c[0]));
         }
         const m = new L.Polygon(coords);
         m.addTo(this.drawnItems);
@@ -937,16 +937,3 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
 }
-
-
-/*
-        const _latDms = data.lat.deg + '° ' + data.lat.min + '\'' + data.lat.sec + '"';
-        const _lngDms = data.lng.deg + '° ' + data.lng.min + '\'' + data.lng.sec + '"';
-        const g = new GeoPoint(_lngDms, _latDms);
-        data.latDec = g.latDec;
-        data.lngDec = g.lonDec;
-
-        // Create the marker
-        const latLng = L.latLng(data.latDec, data.lngDec);
-        const gpsPhotoMarker = new L.Marker(latLng, { icon: leafletObjects.gpsPhotoMarkerIcon() });
-*/
