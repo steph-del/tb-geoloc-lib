@@ -27,11 +27,11 @@ export class AppComponent {
   @Input() geolocation_provider = 'osm';
   @Input() map_quest_api_key: string;
 
-  @Input() osm_nominatim_api_url: string ;
-  @Input() map_quest_nominatim_api_url: string;
-  @Input() open_elevation_api_url: string;
-  @Input() map_quest_elevation_api_url: string;
-  @Input() fr_geo_api_url: string;
+  @Input() set osm_nominatim_api_url(url: string) { if (url && url !== '') { this._osm_nominatim_api_url = url; } }
+  @Input() set map_quest_nominatim_api_url(url: string) { if (url && url !== '') { this._map_quest_nominatim_api_url = url; } }
+  @Input() set open_elevation_api_url(url: string) { if (url && url !== '') { this._open_elevation_api_url = url; } }
+  @Input() set map_quest_elevation_api_url(url: string) { if (url && url !== '') { this._map_quest_elevation_api_url = url; } }
+  @Input() set fr_geo_api_url(url: string) { if (url && url !== '') { this._fr_geo_api_url = url; } }
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
@@ -41,6 +41,12 @@ export class AppComponent {
   _get_osm_simple_line: boolean;
   _show_lat_lng_elevation_inputs: boolean;
   _osm_class_filters: Array<string> = [];
+
+  _osm_nominatim_api_url = 'https://nominatim.openstreetmap.org';
+  _map_quest_nominatim_api_url = 'https://open.mapquestapi.com/nominatim/v1';
+  _open_elevation_api_url = 'https://api.open-elevation.com/api/v1';
+  _map_quest_elevation_api_url = 'https://open.mapquestapi.com/elevation/v1';
+  _fr_geo_api_url = 'https://geo.api.gouv.fr';
 
   constructor() { }
 
