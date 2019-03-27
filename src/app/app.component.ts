@@ -17,11 +17,12 @@ export class AppComponent {
   @Input() set polyline(value: string) { if (value === 'true') { this._polyline = true; } }
   @Input() set polygon(value: string) { if (value === 'true') { this._polygon = true; } }
   @Input() zoom_init = 4;
-  @Input() set lat_init(value: number) { this.lat_lng_init[0] = value; }
-  @Input() set lng_init(value: number) { this.lat_lng_init[1] = value; }
-  @Input() lat_lng_init: Array<number> = [46.5, 2.9];
+  @Input() set lat_init(value: number) { this.lng_lat_init[1] = value; }
+  @Input() set lng_init(value: number) { this.lng_lat_init[0] = value; }
+  @Input() lng_lat_init: Array<number> = [2.9, 46.5];
   @Input() set get_osm_simple_line(value: string) { if (value === 'true') { this._get_osm_simple_line = true; } }
   @Input() set show_lat_lng_elevation_inputs(value: string) { if (value === 'true') { this._show_lat_lng_elevation_inputs = true; } }
+  @Input() lat_lng_format: 'dec' | 'dms' = 'dec';
   @Input() elevation_provider = 'openelevation';
   @Input() geolocation_provider = 'osm';
   @Input() map_quest_api_key: string;
