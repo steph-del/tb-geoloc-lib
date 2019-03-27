@@ -701,7 +701,7 @@ export class MapComponent implements OnInit, OnDestroy {
       // At this time, callGeolocElevationApisUsingLatLngInputsValues set this.osmPlace = null
       // But we already got it from event.option.value
       this.osmPlace = osmPlace;
-      this.bindLocationOutput([_elevation, osmPlace]);
+      this.bindLocationOutput([_elevation, osmPlace, this.inseeData]);
     });
 
   }
