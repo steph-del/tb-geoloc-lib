@@ -12,6 +12,9 @@ import { isDefined } from '@angular/compiler/src/util';
 })
 export class GeocodingService {
   mapQuestApiKey: string = null;
+  osmNominatimApiUrl: string = null;
+  mapQuestNominatimApiUrl: string = null;
+  frGeoApiUrl: string = null;
 
   constructor(private http: HttpClient) { }
 
@@ -46,28 +49,28 @@ export class GeocodingService {
   }
 
   geocodeUsingOSM(address: string): Observable<any> {
-    const apiUrl = `https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
+    const apiUrl = `${this.osmNominatimApiUrl}/?format=json&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
     return this.http.get(apiUrl).pipe(
       map((obj: NominatimObject) => obj)
     );
   }
 
   geocodeUsingMapQuest(address: string): Observable<any> {
-    const apiUrl = `http://open.mapquestapi.com/nominatim/v1/search.php?key=${this.mapQuestApiKey}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
+    const apiUrl = `${this.mapQuestNominatimApiUrl}/search.php?key=${this.mapQuestApiKey}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
     return this.http.get(apiUrl).pipe(
       map((obj: NominatimObject) => obj)
     );
   }
 
   reverseUsingOSM(lat: number, lng: number): Observable<any> {
-    const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&polygon_geojson=1`;
+    const apiUrl = `${this.osmNominatimApiUrl}/reverse?format=json&lat=${lat}&lon=${lng}&polygon_geojson=1`;
     return this.http.get(apiUrl).pipe(
       map((obj: NominatimObject) => obj)
     );
   }
 
   reverseUsingMapQuest(lat: number, lng: number): Observable<any> {
-    const apiUrl = `http://open.mapquestapi.com/geocoding/v1/reverse?key=${this.mapQuestApiKey}&location=${lat},${lng}`;
+    const apiUrl = `${this.mapQuestNominatimApiUrl}/reverse?key=${this.mapQuestApiKey}&lat=${lat}&lon=${lng}`;
     return this.http.get(apiUrl).pipe(
       map((obj: NominatimObject) => obj)
     );
@@ -223,9 +226,19 @@ export class GeocodingService {
    * Get INSEE data (France only)
    */
   getInseeData(lat: number, lng: number): Observable<any> {
-    const apiUrl = `https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}`;
+    const apiUrl = `${this.frGeoApiUrl}/communes?lat=${lat}&lon=${lng}`;
     return this.http.get(apiUrl).pipe(
       map((obj) => obj[0] as InseeCommune)
     );
+  }
+
+  setOsmNominatimApiUrl(url: string): void {
+    this.osmNominatimApiUrl = url;
+  }
+  setMapQuestNominatimApiUrl(url: string): void {
+    this.mapQuestNominatimApiUrl = url;
+  }
+  setFrGeoApiUrl(url: string): void {
+    this.frGeoApiUrl = url;
   }
 }

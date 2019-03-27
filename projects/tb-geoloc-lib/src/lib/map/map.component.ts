@@ -53,6 +53,12 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() geolocationProvider = 'osm';
   @Input() mapQuestApiKey = 'KpzlEtCq6BmVVf37R1EXV3jWoh20ynCc';
 
+  @Input() osmNominatimApiUrl = 'https://nominatim.openstreetmap.org';
+  @Input() mapQuestNominatimApiUrl = 'https://open.mapquestapi.com/nominatim/v1';
+  @Input() openElevationApiUrl = 'https://api.open-elevation.com/api/v1';
+  @Input() mapQuestElevationApiUrl = 'https://open.mapquestapi.com/elevation/v1';
+  @Input() frGeoApiUrl = 'https://geo.api.gouv.fr';
+
   @Input() set patchAddress(value: string) {
     if (value && value !== null) { this._patchAddress(value); }
   }
@@ -111,10 +117,10 @@ export class MapComponent implements OnInit, OnDestroy {
   private drawType: string;
   private drawnItem: any;
 
-  private osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
+  private osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
   private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'OpenTopoMap'});
-  private googleHybridLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
-  private brgmLayer = L.tileLayer.wms('http://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
+  private googleHybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
+  private brgmLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
   private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
   private geoResultsLayer = L.geoJSON(null, {style: function() { return { color: '#ff7800', weight: 5, opacity: 0.65 }; }});
   private geolocatedPhotoLatLngLayer = L.geoJSON();
@@ -283,9 +289,16 @@ export class MapComponent implements OnInit, OnDestroy {
    * API initialization
    */
   initApi() {
+    this.geocodeService.setOsmNominatimApiUrl(this.osmNominatimApiUrl);
+    this.geocodeService.setMapQuestNominatimApiUrl(this.mapQuestNominatimApiUrl);
+    this.elevationService.setOpenElevationApiUrl(this.openElevationApiUrl);
+    this.elevationService.setMapQuestElevationApiUrl(this.mapQuestElevationApiUrl);
+    this.geocodeService.setFrGeoApiUrl(this.frGeoApiUrl);
+
     this.elevationService.setMapQuestApiKey(this.mapQuestApiKey);
     this.geocodeService.setMapQuestApiKey(this.mapQuestApiKey);
   }
+
   /**
    * Unsubscribe
    */
@@ -689,7 +702,7 @@ export class MapComponent implements OnInit, OnDestroy {
       // At this time, callGeolocElevationApisUsingLatLngInputsValues set this.osmPlace = null
       // But we already got it from event.option.value
       this.osmPlace = osmPlace;
-      this.bindLocationOutput([_elevation, osmPlace]);
+      this.bindLocationOutput([_elevation, osmPlace, this.inseeData]);
     });
 
   }

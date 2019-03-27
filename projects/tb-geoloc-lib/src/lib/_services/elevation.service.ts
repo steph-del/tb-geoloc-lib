@@ -8,6 +8,8 @@ import { map } from 'rxjs/operators';
 })
 export class ElevationService {
   mapQuestApiKey: string = null;
+  openElevationApiUrl: string = null;
+  mapQuestElevationApiUrl: string = null;
 
   constructor(private http: HttpClient) { }
 
@@ -22,17 +24,25 @@ export class ElevationService {
   }
 
   getOpenElevation(lat: number, lng: number): Observable<number> {
-    const apiUrl = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`;
+    const apiUrl = `${this.openElevationApiUrl}/lookup?locations=${lat},${lng}`;
     return this.http.get(apiUrl).pipe(
       map((obj: OpenElevationApiObject) => obj.results[0].elevation)
     );
   }
 
   getMapQuestElevation(lat: number, lng: number): Observable<number> {
-    const apiUrl = `http://open.mapquestapi.com/elevation/v1/profile?key=${this.mapQuestApiKey}&shapeFormat=raw&latLngCollection=${lat},${lng}`;
+    const apiUrl = `${this.mapQuestElevationApiUrl}/profile?key=${this.mapQuestApiKey}&shapeFormat=raw&latLngCollection=${lat},${lng}`;
     return this.http.get(apiUrl).pipe(
       map((obj: MapQuestElevationApiObject) => obj.elevationProfile[0].height)
     );
+  }
+
+  setOpenElevationApiUrl(url: string): void {
+    this.openElevationApiUrl = url;
+  }
+
+  setMapQuestElevationApiUrl(url: string): void {
+    this.mapQuestElevationApiUrl = url;
   }
 }
 
