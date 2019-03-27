@@ -19,7 +19,7 @@
         <div class="lat-lng-dec-wrapper" *ngIf="latLngFormat=='dec'">
           <!-- latitude / longitude format selection -->  
           <div class="latitude-wrapper">
-            <button mat-icon-button [matMenuTriggerFor]="menu">
+            <button type="button" mat-icon-button (click)="$event.preventDefault()" [matMenuTriggerFor]="menu">
               <mat-icon>more_vert</mat-icon>
             </button>
 
@@ -36,7 +36,7 @@
               <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
               <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
             </mat-form-field>
-            <button mat-icon-button (click)="addMarkerFromLatLngCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.latInput.valid || !latlngFormGroup.controls.lngInput.valid" color="primary">
+            <button type="button" mat-icon-button (click)="$event.preventDefault(); addMarkerFromLatLngCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.latInput.valid || !latlngFormGroup.controls.lngInput.valid" color="primary">
               <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
             </button>
           </div>
@@ -46,7 +46,7 @@
         <div *ngIf="latLngFormat=='dms'" class="lat-lng-dms-wrapper">
           <!-- latitude / longitude format selection --> 
           <div class="latitude-wrapper">
-            <button mat-icon-button [matMenuTriggerFor]="menu">
+            <button type="button" mat-icon-button (click)="$event.preventDefault()" [matMenuTriggerFor]="menu">
               <mat-icon>more_vert</mat-icon>
             </button>
 
@@ -66,7 +66,7 @@
               <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
             </mat-form-field>
 
-            <button mat-icon-button (click)="addMarkerFromDmsCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.dmsLatInput.valid || !latlngFormGroup.controls.dmsLngInput.valid" color="primary">
+            <button type="button" mat-icon-button (click)="$event.preventDefault(); addMarkerFromDmsCoord(); callGeolocElevationApisUsingLatLngInputsValues();" [disabled]="!latlngFormGroup.controls.dmsLatInput.valid || !latlngFormGroup.controls.dmsLngInput.valid" color="primary">
               <mat-icon matTooltip="Utiliser ces coordonnées">where_to_vote</mat-icon>
             </button>
           </div>
@@ -74,8 +74,8 @@
 
         <!-- menu format decimal / dms-->
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="setLatLngInputFormat('dec')">Décimal</button>
-          <button mat-menu-item (click)="setLatLngInputFormat('dms')">Degrés minutes secondes</button>
+          <button type="button" mat-menu-item (click)="$event.preventDefault(); setLatLngInputFormat('dec')">Décimal</button>
+          <button type="button" mat-menu-item (click)="$event.preventDefault(); setLatLngInputFormat('dms')">Degrés minutes secondes</button>
         </mat-menu>
       </div>
     
