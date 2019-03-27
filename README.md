@@ -54,7 +54,12 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | zoomInit                  |        | `number`   |          | 4                | Zoom au démarrage de la carte (min et max peuvent dépendre des capacités de la couche affichée par défaut) |
 | getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
 | showLatLngElevationInputs |        | boolean  |          | true             | Affiche les champs de latitude, longitude et altitude. Si false, les données lat, long et altitude sont affichées sous forme de texte et sous la carte.
-| latLngFormat              |        | string   | `'dec' | 'dms'` | `'dec'`   | Format de saisie des coordonnées (décimal ou degrés minutes secondes)
+| latLngFormat              |        | string   | `'dec'` | `'dms'` | `'dec'`   | Format de saisie des coordonnées (décimal ou degrés minutes secondes)
+| osmNominatimApiUrl        |        | string   |          | 'https://nominatim.openstreetmap.org'       | URL de l'API Nominatim chez OSM
+| mapQuestNominatimApiUrl   |        | string   |          | 'https://open.mapquestapi.com/nominatim/v1' | URL de l'API Nominatim chez MapQuest
+| openElevationApiUrl       |        | string   |          | 'https://api.open-elevation.com/api/v1'     | URL de l'API OpenElevation
+| mapQuestElevationApiUrl   |        | string   |          | 'https://open.mapquestapi.com/elevation/v1' | URL de l'API Elevation de MapQuest
+| frGeoApiUrl               |        | string   |          | 'https://geo.api.gouv.fr'                   | URL de l'API des référentiels géographiques français
 | patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
 | patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
 | patchLngLatDec            |        | `[number, number]` ([longitude, latitude])  |    |                  | rempli les champs 'latitude' et 'longitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |
