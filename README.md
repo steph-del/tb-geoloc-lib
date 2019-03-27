@@ -54,6 +54,7 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | zoomInit                  |        | `number`   |          | 4                | Zoom au démarrage de la carte (min et max peuvent dépendre des capacités de la couche affichée par défaut) |
 | getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
 | showLatLngElevationInputs |        | boolean  |          | true             | Affiche les champs de latitude, longitude et altitude. Si false, les données lat, long et altitude sont affichées sous forme de texte et sous la carte.
+| latLngFormat              |        | string   | `'dec' | 'dms'` | `'dec'`   | Format de saisie des coordonnées (décimal ou degrés minutes secondes)
 | patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
 | patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
 | patchLngLatDec            |        | `[number, number]` ([longitude, latitude])  |    |                  | rempli les champs 'latitude' et 'longitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |

@@ -43,6 +43,7 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() zoomInit = 4;
   @Input() getOsmSimpleLine = false;
   @Input() showLatLngElevationInputs = true;
+  @Input() latLngFormat: 'dec' | 'dms' = 'dec';
   @Input() set reset(value: boolean) {
     if (value === true) { this.resetComponent(); }
   }
@@ -76,7 +77,6 @@ export class MapComponent implements OnInit, OnDestroy {
   elevationFormGroup: FormGroup;
   geoSearchFormGroup: FormGroup;
   geoSearchResults: Array<NominatimObject>;
-  coordFormat = 'dms';            // 'decimal' | 'dms'
 
   // ---------
   // VARIABLES
@@ -812,8 +812,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * Change the form coordinates format : 'decimal' or 'dms'
    */
   setLatLngInputFormat(format: string): void {
-    if (format !== 'decimal' && format !== 'dms') { return; }
-    this.coordFormat = format;
+    if (format !== 'dec' && format !== 'dms') { return; }
+    this.latLngFormat = format;
   }
 
   /**

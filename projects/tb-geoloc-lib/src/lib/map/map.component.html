@@ -16,7 +16,7 @@
       <!-- lat/lng inputs -->
       <div [formGroup]="latlngFormGroup">
         <!-- latitude / longitude decimal format -->
-        <div class="lat-lng-dec-wrapper" *ngIf="coordFormat=='decimal'">
+        <div class="lat-lng-dec-wrapper" *ngIf="latLngFormat=='dec'">
           <!-- latitude / longitude format selection -->  
           <div class="latitude-wrapper">
             <button mat-icon-button [matMenuTriggerFor]="menu">
@@ -43,7 +43,7 @@
         </div>
 
         <!-- latitude / longitude DMS format -->
-        <div *ngIf="coordFormat=='dms'" class="lat-lng-dms-wrapper">
+        <div *ngIf="latLngFormat=='dms'" class="lat-lng-dms-wrapper">
           <!-- latitude / longitude format selection --> 
           <div class="latitude-wrapper">
             <button mat-icon-button [matMenuTriggerFor]="menu">
@@ -74,8 +74,8 @@
 
         <!-- menu format decimal / dms-->
         <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="setLatLngInputFormat('dec')">Décimal</button>
           <button mat-menu-item (click)="setLatLngInputFormat('dms')">Degrés minutes secondes</button>
-          <button mat-menu-item (click)="setLatLngInputFormat('decimal')">Décimal</button>
         </mat-menu>
       </div>
     
