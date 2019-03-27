@@ -1,6 +1,6 @@
 {
   "name": "tb-geoloc-lib",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Geolocation module with Leaflet and Nominatim for Tela Botanica's applications",
   "homepage": "https://github.com/steph-del/tb-geoloc-lib",
   "peerDependencies": {
