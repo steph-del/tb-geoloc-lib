@@ -27,6 +27,12 @@ export class AppComponent {
   @Input() geolocation_provider = 'osm';
   @Input() map_quest_api_key: string;
 
+  @Input() osm_nominatim_api_url: string ;
+  @Input() map_quest_nominatim_api_url: string;
+  @Input() open_elevation_api_url: string;
+  @Input() map_quest_elevation_api_url: string;
+  @Input() fr_geo_api_url: string;
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
 
   _marker: boolean;
