@@ -55,9 +55,11 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
 | showLatLngElevationInputs |        | boolean  |          | true             | Affiche les champs de latitude, longitude et altitude. Si false, les données lat, long et altitude sont affichées sous forme de texte et sous la carte.
 | latLngFormat              |        | string   | `'dec'` | `'dms'` | `'dec'`   | Format de saisie des coordonnées (décimal ou degrés minutes secondes)
+| elevationProvider         |        | string   | 'openElevation' \| 'elevationApiIo' \| 'mapQuest' | 'openElevation' | Service altitudinal à utiliser
 | osmNominatimApiUrl        |        | string   |          | 'https://nominatim.openstreetmap.org'       | URL de l'API Nominatim chez OSM
 | mapQuestNominatimApiUrl   |        | string   |          | 'https://open.mapquestapi.com/nominatim/v1' | URL de l'API Nominatim chez MapQuest
 | openElevationApiUrl       |        | string   |          | 'https://api.open-elevation.com/api/v1'     | URL de l'API OpenElevation
+| elevationApiIoApiUrl      |        | string   |          | 'https://elevation-api.io/api/elevation'    | URL de l'API elevationApi (http://elevation-api.io)
 | mapQuestElevationApiUrl   |        | string   |          | 'https://open.mapquestapi.com/elevation/v1' | URL de l'API Elevation de MapQuest
 | frGeoApiUrl               |        | string   |          | 'https://geo.api.gouv.fr'                   | URL de l'API des référentiels géographiques français
 | osmTilesLayerApi          |        | string   |          | 'https://{s}.tile.openstreetmap.org'        | URL de l'API OSM fournissant les tuiles |

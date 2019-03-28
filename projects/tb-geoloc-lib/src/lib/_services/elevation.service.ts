@@ -9,6 +9,7 @@ import { map } from 'rxjs/operators';
 export class ElevationService {
   mapQuestApiKey: string = null;
   openElevationApiUrl: string = null;
+  elevationApiIoApiUrl: string = null;
   mapQuestElevationApiUrl: string = null;
 
   constructor(private http: HttpClient) { }
@@ -19,6 +20,7 @@ export class ElevationService {
 
   getElevation(lat: number, lng: number, provider: string): Observable<number> {
     if (provider.toLowerCase() === 'openelevation') { return this.getOpenElevation(lat, lng); }
+    if (provider.toLowerCase() === 'elevationapiio') { return this.getElevationApiIo(lat, lng); }
     if (provider.toLowerCase() === 'mapquest' && this.mapQuestApiKey !== null) { return this.getMapQuestElevation(lat, lng); }
     return of(-1);
   }
@@ -27,6 +29,13 @@ export class ElevationService {
     const apiUrl = `${this.openElevationApiUrl}/lookup?locations=${lat},${lng}`;
     return this.http.get(apiUrl).pipe(
       map((obj: OpenElevationApiObject) => obj.results[0].elevation)
+    );
+  }
+
+  getElevationApiIo(lat: number, lng: number): Observable<number> {
+    const apiUrl = `${this.elevationApiIoApiUrl}?points=${lat},${lng}`;
+    return this.http.get(apiUrl).pipe(
+      map((obj: ElevationApiIoObject) => obj.elevations[0].elevation)
     );
   }
 
@@ -41,9 +50,14 @@ export class ElevationService {
     this.openElevationApiUrl = url;
   }
 
+  setElevationApiIoApiUrl(url: string): void {
+    this.elevationApiIoApiUrl = url;
+  }
+
   setMapQuestElevationApiUrl(url: string): void {
     this.mapQuestElevationApiUrl = url;
   }
+
 }
 
 interface OpenElevationApiObject {
@@ -52,6 +66,15 @@ interface OpenElevationApiObject {
     latitude: number,
     longitude: number
   }>;
+}
+
+interface ElevationApiIoObject {
+  elevations: Array<{
+    lat: number,
+    lon: number,
+    elevation: number
+  }>;
+  resolution: string;
 }
 
 interface MapQuestElevationApiObject {
