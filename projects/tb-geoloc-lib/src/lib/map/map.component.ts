@@ -58,6 +58,8 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() mapQuestElevationApiUrl = 'https://open.mapquestapi.com/elevation/v1';
   @Input() frGeoApiUrl = 'https://geo.api.gouv.fr';
 
+  @Input() osmTilesLayerApi = 'https://{s}.tile.openstreetmap.org';
+
   @Input() set patchAddress(value: string) {
     if (value && value !== null) { this._patchAddress(value); }
   }
@@ -116,7 +118,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private drawType: string;
   private drawnItem: any;
 
-  private osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
+  private osmLayer = L.tileLayer(`${this.osmTilesLayerApi}/{z}/{x}/{y}.png`, { maxZoom: 18, attribution: 'Open Street map' });
   private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'OpenTopoMap'});
   private googleHybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
   private brgmLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});

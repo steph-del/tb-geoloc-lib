@@ -60,6 +60,7 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | openElevationApiUrl       |        | string   |          | 'https://api.open-elevation.com/api/v1'     | URL de l'API OpenElevation
 | mapQuestElevationApiUrl   |        | string   |          | 'https://open.mapquestapi.com/elevation/v1' | URL de l'API Elevation de MapQuest
 | frGeoApiUrl               |        | string   |          | 'https://geo.api.gouv.fr'                   | URL de l'API des référentiels géographiques français
+| osmTilesLayerApi          |        | string   |          | 'https://{s}.tile.openstreetmap.org'        | URL de l'API OSM fournissant les tuiles |
 | patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
 | patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
 | patchLngLatDec            |        | `[number, number]` ([longitude, latitude])  |    |                  | rempli les champs 'latitude' et 'longitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |
