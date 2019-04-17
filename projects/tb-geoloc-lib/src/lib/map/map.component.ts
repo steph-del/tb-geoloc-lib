@@ -78,6 +78,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
+  @Output() httpError = new EventEmitter<any>();
 
   // -------------------------
   // FORMS & RELATED VARIABLES
@@ -189,7 +190,7 @@ export class MapComponent implements OnInit, OnDestroy {
         this.geoSearchResults = results;
       }
     }, (error) => {
-      // @toto manage error
+      this.httpError.next(error);
       this.isLoadingAddress = false;
     });
 
@@ -589,6 +590,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     }, error => {
       // Manage error
+      this.httpError.next(error);
       // spinnners off
       this.isLoadingAddress = false;
       this.isLoadingElevation = false;
