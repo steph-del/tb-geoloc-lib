@@ -120,10 +120,10 @@ export class MapComponent implements OnInit, OnDestroy {
   private drawType: string;
   private drawnItem: any;
 
-  private osmLayer = L.tileLayer(`${this.osmTilesLayerApi}/{z}/{x}/{y}.png`, { maxZoom: 18, attribution: 'Open Street map' });
-  private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'OpenTopoMap'});
-  private googleHybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
-  private brgmLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
+  private osmLayer = L.tileLayer(`${this.osmTilesLayerApi}/{z}/{x}/{y}.png`, { maxZoom: 18, attribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank">© les contributeurs d’OpenStreetMap</a> - Tuiles : <a href="https://www.openstreetmap.fr" target="_blank">OsmFr</a>' });
+  private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '<a href="https://opentopomap.org" target="_blank">© OpenTopoMap</a>'});
+  private googleHybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '<a href="https://www.google.com" target="_blank">© Google Maps</a>' });
+  private brgmLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie', attribution: '<a href="https://www.brgm.fr/" target="_blank">© BRMG</a>'});
   private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
   private geoResultsLayer = L.geoJSON(null, {style: function() { return { color: '#ff7800', weight: 5, opacity: 0.65 }; }});
   private geolocatedPhotoLatLngLayer = L.geoJSON();
