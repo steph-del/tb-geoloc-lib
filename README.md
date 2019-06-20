@@ -69,6 +69,7 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | patchGeometry             |        | `Array<{type: string, coordinates: Array<[number, number]>}>` | | | dessine un ou plusieurs points, polylignes ou polygones. Si seul un point est passé en paramètre, c'est un marqueur déplaçable qui est dessiné. l'auto-completion (API) n'est pas exécutée. |
 | drawMarker                |        | `[number, number]` ([longitude, latitude])  |          |                  | dessine un marker (avec autocompletion de l'adresse et de l'altitude) |
 | reset                     |        | boolean  |          | false            | RAZ du composant si true |
+| enabled                   |        | boolean  |          | true             | Activation du composant. Si false, desactive les champs de saisie, les outils de dessin de la carte en bloque le zoom |
 
 Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
 

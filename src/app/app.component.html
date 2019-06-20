@@ -1,6 +1,7 @@
 <form>
   <tb-geoloc-map
     [geolocatedPhotoLatLng]=testLatLngData
+    [showLatLngElevationInputs]="true"
     [layersToAdd]="layers"
     [reset]="_reset"
     [patchAddress]="patchAddress"
@@ -11,10 +12,12 @@
     elevationProvider="elevationApiIo"
     geolocationProvider="osm"
     [mapQuestApiKey]="mapQuestApiKey"
+    [enabled]="enabled"
     (location)=locationChange($event)>
   </tb-geoloc-map>
 </form>
 <br /><br /><br />
+<button (click)="toggleEnabled()">toggle enabled</button>
 <div (click)="emitLatLngData()">Simuler l'import de photos géolocalisées</div>
 <br />
 <p (click)="reset()">RESET</p>

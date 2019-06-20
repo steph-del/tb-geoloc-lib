@@ -77,6 +77,14 @@ export class MapComponent implements OnInit, OnDestroy {
     if (value && value !== null) { this._drawMarker(value[1], value[0]); }
   }
 
+  @Input() set enabled(value: boolean) {
+    this.componentIsEnabled = value;
+    try {
+      if (value === true) { this.enableComponent(); }
+      if (value === false) { this.disableComponent(); }
+    } catch (error) { }
+  }
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
   @Output() httpError = new EventEmitter<any>();
 
@@ -101,6 +109,7 @@ export class MapComponent implements OnInit, OnDestroy {
   isLoadingLatitude = false;
   isLoadingLongitude = false;
   isLoadingElevation = false;
+  componentIsEnabled = true;
 
   // -------------
   // SUBSCRIPTIONS
@@ -286,6 +295,32 @@ export class MapComponent implements OnInit, OnDestroy {
     this.lngDmsInputSubscription = this.latlngFormGroup.controls.dmsLngInput.valueChanges.subscribe(value => {
       this.latlngFormGroup.controls.dmsLngInput.setValue(dmsFormatter(value), { emitEvent: false});
     });
+  }
+
+  enableComponent(): void {
+    this.geoSearchFormGroup.enable();
+    this.latlngFormGroup.enable();
+    this.elevationFormGroup.enable();
+    this.map.dragging.enable();
+    this.map.touchZoom.enable();
+    this.map.doubleClickZoom.enable();
+    this.map.scrollWheelZoom.enable();
+    this.map.boxZoom.enable();
+    this.map.keyboard.enable();
+    this.map.addControl(this.drawControlFull);
+  }
+
+  disableComponent(): void {
+    this.geoSearchFormGroup.disable();
+    this.latlngFormGroup.disable();
+    this.elevationFormGroup.disable();
+    this.map.dragging.disable();
+    this.map.touchZoom.disable();
+    this.map.doubleClickZoom.disable();
+    this.map.scrollWheelZoom.disable();
+    this.map.boxZoom.disable();
+    this.map.keyboard.disable();
+    this.map.removeControl(this.drawControlFull);
   }
 
   /**

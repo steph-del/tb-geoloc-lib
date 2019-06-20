@@ -15,6 +15,12 @@ export class AppComponent {
   patchLngLatDec: [number, number];
   drawMarker: [number, number];
   patchGeometry: any;
+  enabled = true;
+
+  public toggleEnabled() {
+    this.enabled = !this.enabled;
+    console.log(this.enabled);
+  }
 
   public locationChange(data) {
     console.log(data);
