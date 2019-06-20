@@ -70,6 +70,8 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | drawMarker                |        | `[number, number]` ([longitude, latitude])  |          |                  | dessine un marker (avec autocompletion de l'adresse et de l'altitude) |
 | reset                     |        | boolean  |          | false            | RAZ du composant si true |
 | enabled                   |        | boolean  |          | true             | Activation du composant. Si false, desactive les champs de saisie, les outils de dessin de la carte en bloque le zoom |
+| height                    |        | string   |          | '400px'          | Hauteur de la carte. Attention, ce paramètre doit être de type string et il est préférable de le passer sous la forme `'"200px"'` ou `'"50%"'` |
+| width                     |        | string   |          | '100%'           | Largeur de la carte. Attention, ce paramètre doit être de type string et il est préférable de le passer sous la forme `'"200px"'` ou `'"50%"'` |
 
 Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
 

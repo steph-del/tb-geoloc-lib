@@ -84,6 +84,9 @@ export class MapComponent implements OnInit, OnDestroy {
     } catch (error) { }
   }
 
+  @Input() height = '"400px"';
+  @Input() width = '"100%"';
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
   @Output() httpError = new EventEmitter<any>();
 
