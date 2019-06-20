@@ -78,7 +78,6 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   @Input() set enabled(value: boolean) {
-    this.componentIsEnabled = value;
     try {
       if (value === true) { this.enableComponent(); }
       if (value === false) { this.disableComponent(); }
@@ -109,7 +108,6 @@ export class MapComponent implements OnInit, OnDestroy {
   isLoadingLatitude = false;
   isLoadingLongitude = false;
   isLoadingElevation = false;
-  componentIsEnabled = true;
 
   // -------------
   // SUBSCRIPTIONS
