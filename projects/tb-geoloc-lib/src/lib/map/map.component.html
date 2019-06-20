@@ -82,7 +82,7 @@
       <!-- elevation -->
       <div class="elevationInput" [formGroup]="elevationFormGroup">
         <mat-form-field style="width: 100px;">
-          <input matInput formControlName="elevationInput" matTooltip="Saisir l\'altitude" placeholder="altitude">
+          <input matInput formControlName="elevationInput" matTooltip="Saisir l'altitude" placeholder="altitude">
           <mat-spinner *ngIf="isLoadingElevation" diameter="20" matSuffix></mat-spinner>
           <span *ngIf="!isLoadingElevation" matSuffix>m</span>
         </mat-form-field>
