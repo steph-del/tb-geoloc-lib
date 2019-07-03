@@ -823,8 +823,6 @@ export class MapComponent implements OnInit, OnDestroy {
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
-    // this._location.locationAccuracy = 'Lieu-dit';
-    // this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
     this._location.inseeData = inseeData;
     // published_location : Précision géographique à laquelle est publiée l'obs, permet de gérer le floutage - Précise, Localité, Maille 10x10km
 
