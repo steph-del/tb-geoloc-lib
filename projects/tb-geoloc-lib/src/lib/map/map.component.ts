@@ -366,6 +366,9 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.on('draw:created', (e) => {
       this.drawnItem = e['layer'];
       this.drawType = e['layerType'];
+
+      this.setLocationAccuracy('10 à 100 m');
+
       // If it's a marker, it must be draggable. By default, leaflet.draw module does not provide a draggable marker
       // So, we don't do a this.drawnItems.addLayer(layer);
       // We just draw a new draggableMarker instead
@@ -375,6 +378,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this.zone.run(() => {
             this.callGeolocElevationApisUsingLatLngInputsValues();
           });
+          this.setLocationAccuracy('10 à 100 m');
         }).addTo(this.drawnItems);
       } else {
         this.drawnItems.addLayer(this.drawnItem);
@@ -484,11 +488,14 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setMapEditMode();
     // @TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); this.setLocationAccuracy('10 à 100 m'); }).addTo(this.drawnItems);
 
     // Set (decimal) latLng inputs
     this.latlngFormGroup.controls.latInput.setValue(geopoint.getLatDec(), { emitEvent: false });
     this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLatDec(), { emitEvent: false });
+
+    // Set location accuracy
+    this.setLocationAccuracy('10 à 100 m');
 
     // Fly
     this.flyToDrawnItems();
@@ -506,11 +513,14 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); this.setLocationAccuracy('10 à 100 m'); }).addTo(this.drawnItems);
 
     // Set dmsLatLng inputs
     this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
     this.latlngFormGroup.controls.dmsLngInput.setValue(geopoint.getLonDeg(), { emitEvent: false });
+
+    // Set location accuracy
+    this.setLocationAccuracy('10 à 100 m');
 
     // Fly
     this.flyToDrawnItems();
@@ -746,6 +756,9 @@ export class MapComponent implements OnInit, OnDestroy {
       this.bindLocationOutput([_elevation, osmPlace, this.inseeData]);
     });
 
+    // Set location accuracy
+    this.setLocationAccuracy('Localité');
+
   }
 
   /**
@@ -785,6 +798,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this._location = <LocationModel>{};
   }
 
+  setLocationAccuracy(locAcc: 'Localité' | 'Lieu-dit' | '0 à 10 m' | '10 à 100 m' | '100 à 500 m'): void {
+    this._location.locationAccuracy = locAcc;
+  }
+
   /**
    * Bind data from elevation and OSM http results to this._location
    * Perform some verifications to ensure data integrity
@@ -806,7 +823,8 @@ export class MapComponent implements OnInit, OnDestroy {
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
-    this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
+    // this._location.locationAccuracy = 'Lieu-dit';
+    // this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
     this._location.inseeData = inseeData;
     // published_location : Précision géographique à laquelle est publiée l'obs, permet de gérer le floutage - Précise, Localité, Maille 10x10km
 
@@ -960,6 +978,7 @@ export class MapComponent implements OnInit, OnDestroy {
             this.zone.run(() => {
               this.callGeolocElevationApisUsingLatLngInputsValues();
             });
+            this.setLocationAccuracy('10 à 100 m');
           });
         } else if (value.length > 1) {
           m = new L.Marker(latLng, {icon: leafletObjects.simpleIconMarker()});

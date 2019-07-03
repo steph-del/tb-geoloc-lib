@@ -12,7 +12,7 @@ export interface LocationModel {
   // inseeCode: string;
   elevation: number;
   publishedLocation: 'précise' | 'localité' | '10x10km';
-  locationAccuracy: number;
+  locationAccuracy: 'Localité' | 'Lieu-dit' | '0 à 10 m' | '10 à 100 m' | '100 à 500 m';
   station: string;
   sublocality: string;
   localityConsistency: boolean;
