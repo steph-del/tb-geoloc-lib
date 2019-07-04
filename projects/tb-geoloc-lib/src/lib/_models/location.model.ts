@@ -7,7 +7,6 @@ import { InseeCommune } from './inseeCommune.model';
 
 export interface LocationModel {
   geometry: any;
-  centroid: any;
   geodatum: string;
   locality: string;
   // inseeCode: string;
