@@ -16,6 +16,7 @@ export class AppComponent {
   drawMarker: [number, number];
   patchGeometry: any;
   enabled = true;
+  osmClassFilter = ['place:*', 'boundary:*', 'highway:*'];
 
   public toggleEnabled() {
     this.enabled = !this.enabled;

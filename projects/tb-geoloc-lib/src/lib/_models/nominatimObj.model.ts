@@ -22,4 +22,5 @@ export interface NominatimObject {
   };
   class?: string;             // (reverse) "boundary"
   type?: string;              // (reverse) "administrative",
+  score?: number;
 }

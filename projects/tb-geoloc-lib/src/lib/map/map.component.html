@@ -6,7 +6,7 @@
       <mat-spinner *ngIf="isLoadingAddress" diameter="20" matSuffix></mat-spinner>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addressSelectedChanged($event)">
         <mat-option *ngFor="let address of geoSearchResults" [value]="address">
-          <span *ngIf="geolocationProvider=='osm'">{{ address | osmPlaceReadableAddress:'osm' }}</span>
+          <span *ngIf="geolocationProvider=='osm'">{{ address | osmPlaceReadableAddress:'osm' }} [{{ address.score }}]</span>
           <span *ngIf="geolocationProvider=='mapQuest'">{{ address | osmPlaceReadableAddress:'mapQuest' }}</span>
         </mat-option>
       </mat-autocomplete>

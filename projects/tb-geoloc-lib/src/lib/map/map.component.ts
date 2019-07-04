@@ -190,6 +190,13 @@ export class MapComponent implements OnInit, OnDestroy {
         return this.geocodeService.geocode(value, this.geolocationProvider);
       })
     ).subscribe(results => {
+      // Add the score value
+      for (const result of results) {
+        result.score = 0;
+        if (result.address.country_code === 'fr') { result.score += 20; }
+        if (result.type === 'city') { result.score += 10; }
+      }
+      results.sort((a, b) => b.score - a.score);
       this.isLoadingAddress = false;
       // filter results if needed
       if (this.osmClassFilter.length > 0) {
