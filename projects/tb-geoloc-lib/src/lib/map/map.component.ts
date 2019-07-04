@@ -416,10 +416,12 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.on('draw:deleted', (e) => {
       this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
+      this.resetLocation();
       this.setMapDrawMode();
       this.zone.run(() => {
         this.clearForm();
       });
+      this.location.next(null);
     });
 
     this.redrawMap(100);
