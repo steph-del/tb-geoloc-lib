@@ -9,3 +9,9 @@ export *  from './lib/map/map.component';
 
 export * from './lib/_services/geocoding.service';
 export * from './lib/_services/elevation.service';
+
+export * from './lib/_models/gpsLatLng';
+export * from './lib/_models/inseeCommune.model';
+export * from './lib/_models/location.model';
+export * from './lib/_models/nominatimObj.model';
+export * from './lib/_models/osmPlace.model';
