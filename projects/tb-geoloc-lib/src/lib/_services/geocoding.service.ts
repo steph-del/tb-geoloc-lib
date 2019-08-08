@@ -58,18 +58,14 @@ export class GeocodingService {
     return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
-  reverseUsingOSM(lat: number, lng: number): Observable<any> {
+  reverseUsingOSM(lat: number, lng: number): Observable<NominatimObject> {
     const apiUrl = `${this.osmNominatimApiUrl}/reverse?format=json&lat=${lat}&lon=${lng}&polygon_geojson=1`;
-    return this.http.get(apiUrl).pipe(
-      map((obj: NominatimObject) => obj)
-    );
+    return this.http.get<NominatimObject>(apiUrl);
   }
 
-  reverseUsingMapQuest(lat: number, lng: number): Observable<any> {
+  reverseUsingMapQuest(lat: number, lng: number): Observable<NominatimObject> {
     const apiUrl = `${this.mapQuestNominatimApiUrl}/reverse?key=${this.mapQuestApiKey}&lat=${lat}&lon=${lng}`;
-    return this.http.get(apiUrl).pipe(
-      map((obj: NominatimObject) => obj)
-    );
+    return this.http.get<NominatimObject>(apiUrl);
   }
 
   /**
