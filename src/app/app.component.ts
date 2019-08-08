@@ -11,6 +11,8 @@ export class AppComponent {
   mapQuestApiKey = 'ApIFfQWsb8jW6bkYDD2i0Sq5BD9moJ3l';
   _reset = false;
   patchAddress: string;
+  setAddress: string;
+  inputFocus = false;
   patchElevation: number;
   patchLngLatDec: [number, number];
   drawMarker: [number, number];
@@ -111,6 +113,17 @@ export class AppComponent {
         ]
       }
     ];
+  }
+
+  public testSetAddress() {
+    this.setAddress = 'Bélaye France';
+  }
+
+  public testSetFocus() {
+    this.inputFocus = true;
+    setTimeout(() => {
+      this.inputFocus = false;
+    }, 100);
   }
 }
 

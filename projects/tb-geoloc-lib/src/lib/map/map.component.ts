@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material';
 import { Subscription, Observable, zip } from 'rxjs';
@@ -26,6 +26,7 @@ import { InseeCommune } from '../_models/inseeCommune.model';
   styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit, OnDestroy {
+  @ViewChild('locationInput') locationInput: ElementRef;
 
   // --------------
   // INPUT / OUTPUT
@@ -89,6 +90,11 @@ export class MapComponent implements OnInit, OnDestroy {
 
   @Input() height = '"400px"';
   @Input() width = '"100%"';
+  @Input() set inputFocus(value: boolean) {
+    if (value && value !== null) {
+      if (value === true) { this.setFocusOnInput(); }
+    }
+  }
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
   @Output() httpError = new EventEmitter<any>();
@@ -1029,6 +1035,10 @@ export class MapComponent implements OnInit, OnDestroy {
     }
     this.setMapEditMode();
     this.flyToDrawnItems();
+  }
+
+  setFocusOnInput(): void {
+    this.locationInput.nativeElement.focus();
   }
 
 }

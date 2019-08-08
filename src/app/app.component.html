@@ -17,6 +17,7 @@
     [height]="'500px'"
     [width]="'100%'"
     [osmClassFilter]="osmClassFilter"
+    [inputFocus]="inputFocus"
     (location)=locationChange($event)>
   </tb-geoloc-map>
 </form>
@@ -32,3 +33,4 @@
 <p (click)="testPatchGeometry()">TEST patch geometry</p>
 <p (click)="testPatchGeometry2()">TEST patch geometry ++</p>
 <p (click)="testSetAddress()">TEST set address</p>
+<p (click)="testSetFocus()">TEST set focus on input</p>
