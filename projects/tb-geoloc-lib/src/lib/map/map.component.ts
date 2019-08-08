@@ -64,6 +64,9 @@ export class MapComponent implements OnInit, OnDestroy {
   @Input() set patchAddress(value: string) {
     if (value && value !== null) { this._patchAddress(value); }
   }
+  @Input() set setAddress(value: string) {
+    if (value && value !== null) { this._setAddress(value); }
+  }
   @Input() set patchElevation(value: any) {
     if (value && value !== null) { this._patchElevation(value); }
   }
@@ -929,6 +932,13 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   _patchAddress(address: string): void {
     this.geoSearchFormGroup.controls.placeInput.setValue(address, {emitEvent: false});
+  }
+
+  /**
+   * Set address and emit events
+   */
+  _setAddress(address: string): void {
+    this.geoSearchFormGroup.controls.placeInput.setValue(address, {emitEvent: true});
   }
 
   /**

@@ -64,6 +64,7 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | frGeoApiUrl               |        | string   |          | 'https://geo.api.gouv.fr'                   | URL de l'API des référentiels géographiques français
 | osmTilesLayerApi          |        | string   |          | 'https://{s}.tile.openstreetmap.org'        | URL de l'API OSM fournissant les tuiles |
 | patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
+| setAddress                |        | string   |          |                  | rempli le champ 'adresse' et émet un évènement |
 | patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
 | patchLngLatDec            |        | `[number, number]` ([longitude, latitude])  |    |                  | rempli les champs 'latitude' et 'longitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |
 | patchGeometry             |        | `Array<{type: string, coordinates: Array<[number, number]>}>` | | | dessine un ou plusieurs points, polylignes ou polygones. Si seul un point est passé en paramètre, c'est un marqueur déplaçable qui est dessiné. l'auto-completion (API) n'est pas exécutée. |
