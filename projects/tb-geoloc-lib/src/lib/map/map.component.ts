@@ -976,7 +976,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
     for (const item of value) {
       // point
-      if (item.type.toLowerCase() === 'point') {
+      // @Note Leaflet is not supporting multi points (not by this way at less)
+      //       but adding multipoint here avoid function crach
+      if (item.type.toLowerCase() === 'point' || item.type.toLowerCase() === 'multipoint') {
         const latLng = L.latLng(item.coordinates[1], item.coordinates[0]);
         let m: any;
         if (value.length === 1) {
@@ -994,7 +996,7 @@ export class MapComponent implements OnInit, OnDestroy {
       }
 
       // lineString
-      if (item.type.toLowerCase() === 'linestring') {
+      if (item.type.toLowerCase() === 'linestring' || item.type.toLowerCase() === 'multilinestring') {
         const coords: any = [];
         for (const c of item.coordinates) {
           coords.push(new L.LatLng(c[1], c[0]));
@@ -1004,7 +1006,9 @@ export class MapComponent implements OnInit, OnDestroy {
       }
 
       // polygon
-      if (item.type.toLowerCase() === 'polygon') {
+      // @Note Leaflet is not supporting multi polygond (not by this way at less)
+      //       but adding multipoint here avoid function crach
+      if (item.type.toLowerCase() === 'polygon' || item.type.toLowerCase() === 'multipolygon') {
         const coords: any = [];
         for (const c of item.coordinates) {
           coords.push(new L.LatLng(c[1], c[0]));
