@@ -19,6 +19,8 @@ export class AppComponent {
   patchGeometry: any;
   enabled = true;
   osmClassFilter = ['place:*', 'boundary:*', 'highway:*'];
+  lngLatInit = [6.6150, 0.2362];
+  zoomInit = 10.6;
 
   public toggleEnabled() {
     this.enabled = !this.enabled;

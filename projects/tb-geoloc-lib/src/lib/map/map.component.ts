@@ -19,6 +19,7 @@ import { LocationModel } from '../_models/location.model';
 import { NominatimObject } from '../_models/nominatimObj.model';
 import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 import { InseeCommune } from '../_models/inseeCommune.model';
+import { VlAccuracyEnum } from '../_models/vlAccuracy.enum';
 
 @Component({
   selector: 'tb-geoloc-map',
@@ -95,6 +96,7 @@ export class MapComponent implements OnInit, OnDestroy {
       if (value === true) { this.setFocusOnInput(); }
     }
   }
+  @Input() placeMarkerWhenReverseGeocoding = true;
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
   @Output() httpError = new EventEmitter<any>();
@@ -384,6 +386,7 @@ export class MapComponent implements OnInit, OnDestroy {
       this.drawType = e['layerType'];
 
       this.setLocationAccuracy('10 à 100 m');
+      this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
 
       // If it's a marker, it must be draggable. By default, leaflet.draw module does not provide a draggable marker
       // So, we don't do a this.drawnItems.addLayer(layer);
@@ -514,6 +517,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Set location accuracy
     this.setLocationAccuracy('10 à 100 m');
+    this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
 
     // Fly
     this.flyToDrawnItems();
@@ -539,6 +543,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Set location accuracy
     this.setLocationAccuracy('10 à 100 m');
+    this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
 
     // Fly
     this.flyToDrawnItems();
@@ -717,7 +722,7 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    * Call the geoloc API 2 times :
    *  - first call is for reverse geocoding
-   *  - second call is for geoconding, so the address input (placeInput) is updated
+   *  - second call is for geocoding, so the address input (placeInput) is updated
    */
   addressSelectedChanged(event: MatAutocompleteSelectedEvent) {
     const osmPlace = event.option.value;
@@ -757,7 +762,12 @@ export class MapComponent implements OnInit, OnDestroy {
       }
       this.clearGeoResultsLayer();
     } else {
-      this.addMarkerFromLatLngCoord();
+      if (this.placeMarkerWhenReverseGeocoding) {
+        this.addMarkerFromLatLngCoord();
+      } else {
+        const geometryLayer = L.geoJSON().addTo(this.drawnItems);
+        geometryLayer.addData(osmPlace.geojson);
+      }
     }
 
     // Call geoloc and elevation APIs
@@ -776,6 +786,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Set location accuracy
     this.setLocationAccuracy('Localité');
+    this.setVlLocationAccuracy(osmPlace);
 
   }
 
@@ -820,6 +831,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this._location.locationAccuracy = locAcc;
   }
 
+  setVlLocationAccuracy(obj: NominatimObject): void {
+    this._location.vlLocationAccuracy = this.getVlAccuracyByNominatimObject(obj);
+  }
+
   /**
    * Bind data from elevation and OSM http results to this._location
    * Perform some verifications to ensure data integrity
@@ -838,6 +853,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
     const geom: any = this.drawnItems.toGeoJSON();
     this._location.geometry = geom.features[0].geometry;
+    const centroid = this.drawnItems.getBounds().getCenter();
+    this._location.centroid = { type: 'Point', coordinates: [centroid.lng, centroid.lat]};
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
@@ -895,6 +912,43 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Emit
     this.location.next(this._location);
+  }
+
+  getVlAccuracyByNominatimObject(nominatimObj: NominatimObject): VlAccuracyEnum {
+    const _class = nominatimObj.class;
+    let accuracy: VlAccuracyEnum;
+
+    switch (_class) {
+      case 'boundary':
+        // could be commune departement, region or country
+        if (nominatimObj.address['city']
+            || nominatimObj.address['town']
+            || nominatimObj.address['village']
+            || nominatimObj.address['hamlet']) {
+          accuracy = VlAccuracyEnum.CITY;
+        } else if (nominatimObj.address['county']) {
+          accuracy = VlAccuracyEnum.DEPARTEMENT;
+        } else if (nominatimObj.address['state']) {
+          accuracy = VlAccuracyEnum.REGION;
+        } else if (nominatimObj.address['country']) {
+          accuracy = VlAccuracyEnum.COUNTRY;
+        } else { accuracy = VlAccuracyEnum.OTHER; }
+        break;
+      case 'landuse':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case 'place':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case (_class.match(/way/)).input:
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      default:
+        accuracy = VlAccuracyEnum.OTHER;
+        break;
+    }
+
+    return accuracy;
   }
 
   /**

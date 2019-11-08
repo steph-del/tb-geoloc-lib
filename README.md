@@ -74,6 +74,7 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | height                    |        | string   |          | '400px'          | Hauteur de la carte. Attention, ce paramètre doit être de type string et il est préférable de le passer sous la forme `'"200px"'` ou `'"50%"'` |
 | width                     |        | string   |          | '100%'           | Largeur de la carte. Attention, ce paramètre doit être de type string et il est préférable de le passer sous la forme `'"200px"'` ou `'"50%"'` |
 | inputFocus                |        | boolean  |          |                  | place le focus sur le champ de recherche si true |
+| placeMarkerWhenReverseGeocoding |  | boolean  |          | true             | Lors d'une recherche de lieu (reverse geocoding), le lieu selectionné dans l'autocomplète est mis en avant et, s'il s'agit d'un polygone, un marqueur est ajouté à son centre. La géométrie renvoyée est alors celle du marqueur et pas celle du polygone. Si false, aucun marqueur n'est ajouté et c'est le polygone qui est renvoyé comme géométrie. |
 
 Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
 

@@ -15,3 +15,4 @@ export * from './lib/_models/inseeCommune.model';
 export * from './lib/_models/location.model';
 export * from './lib/_models/nominatimObj.model';
 export * from './lib/_models/osmPlace.model';
+export * from './lib/_models/vlAccuracy.enum';

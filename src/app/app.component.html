@@ -13,11 +13,15 @@
     elevationProvider="elevationApiIo"
     geolocationProvider="osm"
     [mapQuestApiKey]="mapQuestApiKey"
+    elevationProvider="mapQuest"
     [enabled]="enabled"
     [height]="'500px'"
     [width]="'100%'"
     [osmClassFilter]="osmClassFilter"
     [inputFocus]="inputFocus"
+    [placeMarkerWhenReverseGeocoding]="true"
+    [lngLatInit]="lngLatInit"
+    [zoomInit]="zoomInit"
     (location)=locationChange($event)>
   </tb-geoloc-map>
 </form>

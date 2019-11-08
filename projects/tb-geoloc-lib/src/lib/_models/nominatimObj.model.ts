@@ -8,7 +8,10 @@ export interface NominatimObject {
   display_name: string;       // "D 50, Le Boulvé, Cahors, Lot, Occitanie, France métropolitaine, 46800, France",
   address: {
     road: string;             // "D 50",
-    village: string;          // "Le Boulvé",
+    city?: string;
+    town?: string;
+    village?: string;         // "Le Boulvé",
+    hamlet?: string;
     county: string;           // "Cahors",
     state: string;            // "Occitanie",
     country: string;          // "France",
