@@ -43,7 +43,7 @@ export class AppComponent {
   @Input() set enabled(value: string) { if (value === 'true') { this._enabled = true; } }
   @Input() set height(value: string) { if (value && value !== '') { this._height = value; } }
   @Input() set width(value: string) { if (value && value !== '') { this._width = value; } }
-  @Input() set inputFocus(value: string) { if (value === 'true') { this._inputFocus = true; } }
+  @Input() set inputFocus(value: string) { if (value === 'true') { this._input_focus = true; } }
 
   @Output() location = new EventEmitter<LocationModel>(); // object to return
   @Output() httpError = new EventEmitter<any>();
@@ -65,7 +65,7 @@ export class AppComponent {
   _enabled: boolean;
   _height: string;
   _width: string;
-  _inputFocus: boolean;
+  _input_focus: boolean;
 
   _osm_nominatim_api_url = 'https://nominatim.openstreetmap.org';
   _map_quest_nominatim_api_url = 'https://open.mapquestapi.com/nominatim/v1';

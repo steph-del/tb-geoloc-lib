@@ -23,16 +23,15 @@
   
   [reset]="_reset"
   [patchAddress]="_patch_address"
-  [setAdress]="_set_address"
+  [setAddress]="_set_address"
   [patchElevation]="_patch_elevation"
-  [patchLatLngDec]="_patch_lat_lng_dec"
+  [patchLngLatDec]="_patch_lng_lat_dec"
   [drawMarker]="_draw_marker"
   [patchGeometry]="_patch_geometry"
   [enabled]="_enabled"
   [height]="_height"
   [width]="_width"
   [inputFocus]="_input_focus"
-  [placeMarkerWhenReverseGeocoding]="_place_marker_when_reverse_geocoding"
 
   (location)="newLocation($event)"
   (httpError)="newHttpError($event)">
