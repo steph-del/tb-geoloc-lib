@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Input, Output, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material';
 import { Subscription, Observable, zip } from 'rxjs';
@@ -19,14 +19,15 @@ import { LocationModel } from '../_models/location.model';
 import { NominatimObject } from '../_models/nominatimObj.model';
 import { LatLngDMSAltitudePhotoName } from '../_models/gpsLatLng';
 import { InseeCommune } from '../_models/inseeCommune.model';
+import { VlAccuracyEnum } from '../_models/vlAccuracy.enum';
 
 @Component({
   selector: 'tb-geoloc-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit, OnDestroy {
+  @ViewChild('locationInput') locationInput: ElementRef;
 
   // --------------
   // INPUT / OUTPUT
@@ -49,18 +50,24 @@ export class MapComponent implements OnInit, OnDestroy {
     if (value === true) { this.resetComponent(); }
   }
 
-  @Input() elevationProvider = 'mapQuest';
-  @Input() geolocationProvider = 'osm';
-  @Input() mapQuestApiKey = 'KpzlEtCq6BmVVf37R1EXV3jWoh20ynCc';
+  @Input() elevationProvider: 'openElevation' | 'elevationApiIo' | 'mapQuest' = 'openElevation';
+  @Input() geolocationProvider: 'osm' | 'mapQuest' = 'osm';
+  @Input() mapQuestApiKey: string;
 
   @Input() osmNominatimApiUrl = 'https://nominatim.openstreetmap.org';
   @Input() mapQuestNominatimApiUrl = 'https://open.mapquestapi.com/nominatim/v1';
   @Input() openElevationApiUrl = 'https://api.open-elevation.com/api/v1';
+  @Input() elevationApiIoApiUrl = 'https://elevation-api.io/api/elevation';
   @Input() mapQuestElevationApiUrl = 'https://open.mapquestapi.com/elevation/v1';
   @Input() frGeoApiUrl = 'https://geo.api.gouv.fr';
 
+  @Input() osmTilesLayerApi = 'https://{s}.tile.openstreetmap.org';
+
   @Input() set patchAddress(value: string) {
     if (value && value !== null) { this._patchAddress(value); }
+  }
+  @Input() set setAddress(value: string) {
+    if (value && value !== null) { this._setAddress(value); }
   }
   @Input() set patchElevation(value: any) {
     if (value && value !== null) { this._patchElevation(value); }
@@ -75,7 +82,24 @@ export class MapComponent implements OnInit, OnDestroy {
     if (value && value !== null) { this._drawMarker(value[1], value[0]); }
   }
 
+  @Input() set enabled(value: boolean) {
+    try {
+      if (value === true) { this.enableComponent(); }
+      if (value === false) { this.disableComponent(); }
+    } catch (error) { }
+  }
+
+  @Input() height = '"400px"';
+  @Input() width = '"100%"';
+  @Input() set inputFocus(value: boolean) {
+    if (value && value !== null) {
+      if (value === true) { this.setFocusOnInput(); }
+    }
+  }
+  @Input() placeMarkerWhenReverseGeocoding = true;
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
+  @Output() httpError = new EventEmitter<any>();
 
   // -------------------------
   // FORMS & RELATED VARIABLES
@@ -117,10 +141,10 @@ export class MapComponent implements OnInit, OnDestroy {
   private drawType: string;
   private drawnItem: any;
 
-  private osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'Open Street map' });
-  private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'OpenTopoMap'});
-  private googleHybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google maps' });
-  private brgmLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie'});
+  private osmLayer = L.tileLayer(`${this.osmTilesLayerApi}/{z}/{x}/{y}.png`, { maxZoom: 18, attribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank">© les contributeurs d’OpenStreetMap</a> - Tuiles : <a href="https://www.openstreetmap.fr" target="_blank">OsmFr</a>' });
+  private openTopoMapLayer = L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: '<a href="https://opentopomap.org" target="_blank">© OpenTopoMap</a>'});
+  private googleHybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '<a href="https://www.google.com" target="_blank">© Google Maps</a>' });
+  private brgmLayer = L.tileLayer.wms('https://geoservices.brgm.fr/geologie', { version: '1.3.0', layers: 'Geologie', attribution: '<a href="https://www.brgm.fr/" target="_blank">© BRMG</a>'});
   private mapLayers: L.Control.LayersObject = {}; // set inside onInit() function
   private geoResultsLayer = L.geoJSON(null, {style: function() { return { color: '#ff7800', weight: 5, opacity: 0.65 }; }});
   private geolocatedPhotoLatLngLayer = L.geoJSON();
@@ -177,6 +201,13 @@ export class MapComponent implements OnInit, OnDestroy {
         return this.geocodeService.geocode(value, this.geolocationProvider);
       })
     ).subscribe(results => {
+      // Add the score value
+      for (const result of results) {
+        result.score = 0;
+        if (result.address.country_code === 'fr') { result.score += 20; }
+        if (result.type === 'city') { result.score += 10; }
+      }
+      results.sort((a, b) => b.score - a.score);
       this.isLoadingAddress = false;
       // filter results if needed
       if (this.osmClassFilter.length > 0) {
@@ -187,7 +218,7 @@ export class MapComponent implements OnInit, OnDestroy {
         this.geoSearchResults = results;
       }
     }, (error) => {
-      // @toto manage error
+      this.httpError.next(error);
       this.isLoadingAddress = false;
     });
 
@@ -285,6 +316,32 @@ export class MapComponent implements OnInit, OnDestroy {
     });
   }
 
+  enableComponent(): void {
+    this.geoSearchFormGroup.enable();
+    this.latlngFormGroup.enable();
+    this.elevationFormGroup.enable();
+    this.map.dragging.enable();
+    this.map.touchZoom.enable();
+    this.map.doubleClickZoom.enable();
+    this.map.scrollWheelZoom.enable();
+    this.map.boxZoom.enable();
+    this.map.keyboard.enable();
+    this.map.addControl(this.drawControlFull);
+  }
+
+  disableComponent(): void {
+    this.geoSearchFormGroup.disable();
+    this.latlngFormGroup.disable();
+    this.elevationFormGroup.disable();
+    this.map.dragging.disable();
+    this.map.touchZoom.disable();
+    this.map.doubleClickZoom.disable();
+    this.map.scrollWheelZoom.disable();
+    this.map.boxZoom.disable();
+    this.map.keyboard.disable();
+    this.map.removeControl(this.drawControlFull);
+  }
+
   /**
    * API initialization
    */
@@ -292,6 +349,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.geocodeService.setOsmNominatimApiUrl(this.osmNominatimApiUrl);
     this.geocodeService.setMapQuestNominatimApiUrl(this.mapQuestNominatimApiUrl);
     this.elevationService.setOpenElevationApiUrl(this.openElevationApiUrl);
+    this.elevationService.setElevationApiIoApiUrl(this.elevationApiIoApiUrl);
     this.elevationService.setMapQuestElevationApiUrl(this.mapQuestElevationApiUrl);
     this.geocodeService.setFrGeoApiUrl(this.frGeoApiUrl);
 
@@ -326,6 +384,10 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.on('draw:created', (e) => {
       this.drawnItem = e['layer'];
       this.drawType = e['layerType'];
+
+      this.setLocationAccuracy('10 à 100 m');
+      this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
+
       // If it's a marker, it must be draggable. By default, leaflet.draw module does not provide a draggable marker
       // So, we don't do a this.drawnItems.addLayer(layer);
       // We just draw a new draggableMarker instead
@@ -335,6 +397,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this.zone.run(() => {
             this.callGeolocElevationApisUsingLatLngInputsValues();
           });
+          this.setLocationAccuracy('10 à 100 m');
         }).addTo(this.drawnItems);
       } else {
         this.drawnItems.addLayer(this.drawnItem);
@@ -372,10 +435,12 @@ export class MapComponent implements OnInit, OnDestroy {
     this.map.on('draw:deleted', (e) => {
       this.clearGeoResultsLayer();
       this.clearDrawnItemsLayer();
+      this.resetLocation();
       this.setMapDrawMode();
       this.zone.run(() => {
         this.clearForm();
       });
+      this.location.next(null);
     });
 
     this.redrawMap(100);
@@ -444,11 +509,15 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setMapEditMode();
     // @TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); this.setLocationAccuracy('10 à 100 m'); }).addTo(this.drawnItems);
 
     // Set (decimal) latLng inputs
     this.latlngFormGroup.controls.latInput.setValue(geopoint.getLatDec(), { emitEvent: false });
     this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLatDec(), { emitEvent: false });
+
+    // Set location accuracy
+    this.setLocationAccuracy('10 à 100 m');
+    this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
 
     // Fly
     this.flyToDrawnItems();
@@ -466,11 +535,15 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ this.callGeolocElevationApisUsingLatLngInputsValues(); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); this.setLocationAccuracy('10 à 100 m'); }).addTo(this.drawnItems);
 
     // Set dmsLatLng inputs
     this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
     this.latlngFormGroup.controls.dmsLngInput.setValue(geopoint.getLonDeg(), { emitEvent: false });
+
+    // Set location accuracy
+    this.setLocationAccuracy('10 à 100 m');
+    this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
 
     // Fly
     this.flyToDrawnItems();
@@ -586,6 +659,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
     }, error => {
       // Manage error
+      this.httpError.next(error);
       // spinnners off
       this.isLoadingAddress = false;
       this.isLoadingElevation = false;
@@ -648,7 +722,7 @@ export class MapComponent implements OnInit, OnDestroy {
    *
    * Call the geoloc API 2 times :
    *  - first call is for reverse geocoding
-   *  - second call is for geoconding, so the address input (placeInput) is updated
+   *  - second call is for geocoding, so the address input (placeInput) is updated
    */
   addressSelectedChanged(event: MatAutocompleteSelectedEvent) {
     const osmPlace = event.option.value;
@@ -688,7 +762,12 @@ export class MapComponent implements OnInit, OnDestroy {
       }
       this.clearGeoResultsLayer();
     } else {
-      this.addMarkerFromLatLngCoord();
+      if (this.placeMarkerWhenReverseGeocoding) {
+        this.addMarkerFromLatLngCoord();
+      } else {
+        const geometryLayer = L.geoJSON().addTo(this.drawnItems);
+        geometryLayer.addData(osmPlace.geojson);
+      }
     }
 
     // Call geoloc and elevation APIs
@@ -704,6 +783,10 @@ export class MapComponent implements OnInit, OnDestroy {
       this.osmPlace = osmPlace;
       this.bindLocationOutput([_elevation, osmPlace, this.inseeData]);
     });
+
+    // Set location accuracy
+    this.setLocationAccuracy('Localité');
+    this.setVlLocationAccuracy(osmPlace);
 
   }
 
@@ -744,6 +827,14 @@ export class MapComponent implements OnInit, OnDestroy {
     this._location = <LocationModel>{};
   }
 
+  setLocationAccuracy(locAcc: 'Localité' | 'Lieu-dit' | '0 à 10 m' | '10 à 100 m' | '100 à 500 m'): void {
+    this._location.locationAccuracy = locAcc;
+  }
+
+  setVlLocationAccuracy(obj: NominatimObject): void {
+    this._location.vlLocationAccuracy = this.getVlAccuracyByNominatimObject(obj);
+  }
+
   /**
    * Bind data from elevation and OSM http results to this._location
    * Perform some verifications to ensure data integrity
@@ -762,10 +853,11 @@ export class MapComponent implements OnInit, OnDestroy {
 
     const geom: any = this.drawnItems.toGeoJSON();
     this._location.geometry = geom.features[0].geometry;
+    const centroid = this.drawnItems.getBounds().getCenter();
+    this._location.centroid = { type: 'Point', coordinates: [centroid.lng, centroid.lat]};
     // geodatum
     this._location.elevation = elevation;
     this._location.localityConsistency = this._location.localityConsistency ? true : null;   // perform : Cohérence entre les coordonnées et la localité
-    this._location.locationAccuracy = this._location.locationAccuracy ? 0 : null;         // perform : Précision (ou incertitude) de la localisation, en mètres --> voir le nombre de décimales pour decLatInput ou decLngInput si point, sinon, demi-longeur de la bounding-box
     this._location.inseeData = inseeData;
     // published_location : Précision géographique à laquelle est publiée l'obs, permet de gérer le floutage - Précise, Localité, Maille 10x10km
 
@@ -822,6 +914,43 @@ export class MapComponent implements OnInit, OnDestroy {
     this.location.next(this._location);
   }
 
+  getVlAccuracyByNominatimObject(nominatimObj: NominatimObject): VlAccuracyEnum {
+    const _class = nominatimObj.class;
+    let accuracy: VlAccuracyEnum;
+
+    switch (_class) {
+      case 'boundary':
+        // could be commune departement, region or country
+        if (nominatimObj.address['city']
+            || nominatimObj.address['town']
+            || nominatimObj.address['village']
+            || nominatimObj.address['hamlet']) {
+          accuracy = VlAccuracyEnum.CITY;
+        } else if (nominatimObj.address['county']) {
+          accuracy = VlAccuracyEnum.DEPARTEMENT;
+        } else if (nominatimObj.address['state']) {
+          accuracy = VlAccuracyEnum.REGION;
+        } else if (nominatimObj.address['country']) {
+          accuracy = VlAccuracyEnum.COUNTRY;
+        } else { accuracy = VlAccuracyEnum.OTHER; }
+        break;
+      case 'landuse':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case 'place':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case (_class.match(/way/)).input:
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      default:
+        accuracy = VlAccuracyEnum.OTHER;
+        break;
+    }
+
+    return accuracy;
+  }
+
   /**
    * Change the form coordinates format : 'decimal' or 'dms'
    */
@@ -863,6 +992,13 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   _patchAddress(address: string): void {
     this.geoSearchFormGroup.controls.placeInput.setValue(address, {emitEvent: false});
+  }
+
+  /**
+   * Set address and emit events
+   */
+  _setAddress(address: string): void {
+    this.geoSearchFormGroup.controls.placeInput.setValue(address, {emitEvent: true});
   }
 
   /**
@@ -910,7 +1046,9 @@ export class MapComponent implements OnInit, OnDestroy {
 
     for (const item of value) {
       // point
-      if (item.type.toLowerCase() === 'point') {
+      // @Note Leaflet is not supporting multi points (not by this way at less)
+      //       but adding multipoint here avoid function crach
+      if (item.type.toLowerCase() === 'point' || item.type.toLowerCase() === 'multipoint') {
         const latLng = L.latLng(item.coordinates[1], item.coordinates[0]);
         let m: any;
         if (value.length === 1) {
@@ -919,6 +1057,7 @@ export class MapComponent implements OnInit, OnDestroy {
             this.zone.run(() => {
               this.callGeolocElevationApisUsingLatLngInputsValues();
             });
+            this.setLocationAccuracy('10 à 100 m');
           });
         } else if (value.length > 1) {
           m = new L.Marker(latLng, {icon: leafletObjects.simpleIconMarker()});
@@ -927,7 +1066,7 @@ export class MapComponent implements OnInit, OnDestroy {
       }
 
       // lineString
-      if (item.type.toLowerCase() === 'linestring') {
+      if (item.type.toLowerCase() === 'linestring' || item.type.toLowerCase() === 'multilinestring') {
         const coords: any = [];
         for (const c of item.coordinates) {
           coords.push(new L.LatLng(c[1], c[0]));
@@ -937,7 +1076,9 @@ export class MapComponent implements OnInit, OnDestroy {
       }
 
       // polygon
-      if (item.type.toLowerCase() === 'polygon') {
+      // @Note Leaflet is not supporting multi polygond (not by this way at less)
+      //       but adding multipoint here avoid function crach
+      if (item.type.toLowerCase() === 'polygon' || item.type.toLowerCase() === 'multipolygon') {
         const coords: any = [];
         for (const c of item.coordinates) {
           coords.push(new L.LatLng(c[1], c[0]));
@@ -948,6 +1089,10 @@ export class MapComponent implements OnInit, OnDestroy {
     }
     this.setMapEditMode();
     this.flyToDrawnItems();
+  }
+
+  setFocusOnInput(): void {
+    this.locationInput.nativeElement.focus();
   }
 
 }

@@ -33,7 +33,20 @@ export class AppComponent {
   @Input() set map_quest_elevation_api_url(url: string) { if (url && url !== '') { this._map_quest_elevation_api_url = url; } }
   @Input() set fr_geo_api_url(url: string) { if (url && url !== '') { this._fr_geo_api_url = url; } }
 
+  @Input() set reset(value: string) { if (value === 'true') { this._reset = true; } }
+  @Input() set patchAddress(value: string) { if (value && value !== '') { this._patch_address = value; } }
+  @Input() set setAddress(value: string) { if (value && value !== '') { this._set_address = value; } }
+  @Input() set patchElevation(value: any) { if (value) { this._patch_elevation = value; } }
+  @Input() set patchLngLatDec(value: [number, number]) { if (value) { this._patch_lng_lat_dec = value; } }
+  @Input() set drawMarker(value: [number, number]) { if (value) { this._draw_marker = value; } }
+  @Input() set patchGeometry(value: Array<{coordinates: Array<number>, type: string}>) { if (value) { this._patch_geometry = value; } }
+  @Input() set enabled(value: string) { if (value === 'true') { this._enabled = true; } }
+  @Input() set height(value: string) { if (value && value !== '') { this._height = value; } }
+  @Input() set width(value: string) { if (value && value !== '') { this._width = value; } }
+  @Input() set inputFocus(value: string) { if (value === 'true') { this._inputFocus = true; } }
+
   @Output() location = new EventEmitter<LocationModel>(); // object to return
+  @Output() httpError = new EventEmitter<any>();
 
   _marker: boolean;
   _polyline: boolean;
@@ -41,6 +54,18 @@ export class AppComponent {
   _get_osm_simple_line: boolean;
   _show_lat_lng_elevation_inputs: boolean;
   _osm_class_filters: Array<string> = [];
+
+  _reset: boolean;
+  _patch_address: string;
+  _set_address: string;
+  _patch_elevation: any;
+  _patch_lng_lat_dec: [number, number];
+  _draw_marker: [number, number];
+  _patch_geometry: Array<{coordinates: Array<number>, type: string}>;
+  _enabled: boolean;
+  _height: string;
+  _width: string;
+  _inputFocus: boolean;
 
   _osm_nominatim_api_url = 'https://nominatim.openstreetmap.org';
   _map_quest_nominatim_api_url = 'https://open.mapquestapi.com/nominatim/v1';
@@ -52,5 +77,9 @@ export class AppComponent {
 
   newLocation(data) {
     this.location.emit(data);
+  }
+
+  newHttpError(data) {
+    this.httpError.emit(data);
   }
 }

@@ -22,7 +22,7 @@ export class GeocodingService {
     if (apiKey !== null) { this.mapQuestApiKey = apiKey; }
   }
 
-  geocode(address: string, provider: string): Observable<any> {
+  geocode(address: string, provider: string): Observable<Array<NominatimObject>> {
     if (address === null) { return empty(); } // Avoid sending request on form reset
     if (provider.toLowerCase() === 'osm') { return this.geocodeUsingOSM(address); }
     if (provider.toLowerCase() === 'mapquest') { return this.geocodeUsingMapQuest(address); }
@@ -48,32 +48,24 @@ export class GeocodingService {
     }
   }
 
-  geocodeUsingOSM(address: string): Observable<any> {
+  geocodeUsingOSM(address: string): Observable<Array<NominatimObject>> {
     const apiUrl = `${this.osmNominatimApiUrl}/?format=json&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
-    return this.http.get(apiUrl).pipe(
-      map((obj: NominatimObject) => obj)
-    );
+    return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
-  geocodeUsingMapQuest(address: string): Observable<any> {
+  geocodeUsingMapQuest(address: string): Observable<Array<NominatimObject>> {
     const apiUrl = `${this.mapQuestNominatimApiUrl}/search.php?key=${this.mapQuestApiKey}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
-    return this.http.get(apiUrl).pipe(
-      map((obj: NominatimObject) => obj)
-    );
+    return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
-  reverseUsingOSM(lat: number, lng: number): Observable<any> {
+  reverseUsingOSM(lat: number, lng: number): Observable<NominatimObject> {
     const apiUrl = `${this.osmNominatimApiUrl}/reverse?format=json&lat=${lat}&lon=${lng}&polygon_geojson=1`;
-    return this.http.get(apiUrl).pipe(
-      map((obj: NominatimObject) => obj)
-    );
+    return this.http.get<NominatimObject>(apiUrl);
   }
 
-  reverseUsingMapQuest(lat: number, lng: number): Observable<any> {
+  reverseUsingMapQuest(lat: number, lng: number): Observable<NominatimObject> {
     const apiUrl = `${this.mapQuestNominatimApiUrl}/reverse?key=${this.mapQuestApiKey}&lat=${lat}&lon=${lng}`;
-    return this.http.get(apiUrl).pipe(
-      map((obj: NominatimObject) => obj)
-    );
+    return this.http.get<NominatimObject>(apiUrl);
   }
 
   /**
@@ -111,21 +103,25 @@ export class GeocodingService {
       neighbourhood = osmPlaceResult.address.neighbourhood;
     }
 
+    // Get country
+    const country = osmPlaceResult.address.country;
+    const showCountry = country !== 'France' ? ' (' + country + ')' : '';
+
     // Return
     if (road && neighbourhood && subLocality && locality) {
-      return road + ' (' + neighbourhood + ') ' + subLocality + ' ' + locality;
+      return road + ' (' + neighbourhood + ') ' + subLocality + ' ' + locality + showCountry;
     } else if (road && !neighbourhood && subLocality && locality) {
-      return road + ' ' + subLocality + ' ' + locality;
+      return road + ' ' + subLocality + ' ' + locality + showCountry;
     } else if (road && !neighbourhood && !subLocality && locality) {
-      return road + ', ' + locality;
+      return road + ', ' + locality + showCountry;
     } else if (!road && neighbourhood && subLocality && locality) {
       return neighbourhood + ' ' + subLocality + ' ' + locality;
     } else if (!road && !neighbourhood && subLocality && locality) {
-      return subLocality + ' ' + locality;
+      return subLocality + ' ' + locality + showCountry;
     } else if (!road && !neighbourhood && !subLocality && locality) {
-      return locality;
+      return locality + showCountry;
     } else {
-      return osmPlaceResult.display_name;
+      return osmPlaceResult.display_name + showCountry;
     }
 
   }

@@ -2,7 +2,7 @@
   <div id="geoloc-map-meta">
     <!-- geosearch autocomplete -->
     <mat-form-field style="width: 100%;">
-      <input matInput [formControl]="geoSearchFormGroup.controls.placeInput" placeholder="Trouver un lieu" aria-label="Trouver un lieu" [matAutocomplete]="auto">
+      <input matInput #locationInput [formControl]="geoSearchFormGroup.controls.placeInput" matTooltip="Trouver un lieu" placeholder="Trouver un lieu" aria-label="Trouver un lieu" [matAutocomplete]="auto">
       <mat-spinner *ngIf="isLoadingAddress" diameter="20" matSuffix></mat-spinner>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addressSelectedChanged($event)">
         <mat-option *ngFor="let address of geoSearchResults" [value]="address">
@@ -24,7 +24,7 @@
             </button>
 
             <mat-form-field class="latitude-input-group">
-              <input matInput formControlName="latInput" placeholder="latitude">
+              <input matInput formControlName="latInput" matTooltip="Saisir les coordonnées géographiques" placeholder="latitude">
               <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
               <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
             </mat-form-field>
@@ -32,7 +32,7 @@
 
           <div class="longitude-wrapper">
             <mat-form-field class="longitude-input-group">
-              <input matInput formControlName="lngInput" placeholder="longitude">
+              <input matInput formControlName="lngInput" matTooltip="Saisir les coordonnées géographiques" placeholder="longitude">
               <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
               <mat-error *ngIf="latlngFormGroup.controls.latInput.dirty && latlngFormGroup.controls.latInput.hasError('malformedLatLngDecFormat')">Format non valide</mat-error>
             </mat-form-field>
@@ -51,7 +51,7 @@
             </button>
 
             <mat-form-field class="latitude-input-group">
-              <input matInput formControlName="dmsLatInput" placeholder="(deg)°  (min)'  (sec)&quot;">
+              <input matInput formControlName="dmsLatInput" matTooltip="Saisir les coordonnées géographiques" placeholder="(deg)°  (min)'  (sec)&quot;">
               <span matPrefix>N&nbsp;</span>
               <mat-spinner *ngIf="isLoadingLatitude" diameter="20" matSuffix></mat-spinner>
               <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
@@ -60,7 +60,7 @@
 
           <div class="longitude-wrapper">
             <mat-form-field class="longitude-input-group">
-              <input matInput formControlName="dmsLngInput" placeholder="(deg)°  (min)'  (sec)&quot;">
+              <input matInput formControlName="dmsLngInput" matTooltip="Saisir les coordonnées géographiques" placeholder="(deg)°  (min)'  (sec)&quot;">
               <span matPrefix>E&nbsp;</span>
               <mat-spinner *ngIf="isLoadingLongitude" diameter="20" matSuffix></mat-spinner>
               <mat-error *ngIf="latlngFormGroup.controls.dmsLatInput.dirty && latlngFormGroup.controls.dmsLatInput.hasError('malformedLatLngDmsFormat')">Format non valide</mat-error>
@@ -82,7 +82,7 @@
       <!-- elevation -->
       <div class="elevationInput" [formGroup]="elevationFormGroup">
         <mat-form-field style="width: 100px;">
-          <input matInput formControlName="elevationInput" placeholder="altitude">
+          <input matInput formControlName="elevationInput" matTooltip="Saisir l'altitude" placeholder="altitude">
           <mat-spinner *ngIf="isLoadingElevation" diameter="20" matSuffix></mat-spinner>
           <span *ngIf="!isLoadingElevation" matSuffix>m</span>
         </mat-form-field>
@@ -90,7 +90,7 @@
     </div>
   </div>
 
-  <div id="geoloc-map-draw" style="height: 400px; min-height: 400px;"
+  <div id="geoloc-map-draw" [style.height]="height" [style.minHeight]="height" [style.width]="width" [style.maxWidth]="width"
       leaflet 
       [leafletOptions]="mapOptions"
       (leafletMapReady)="onMapReady($event)">

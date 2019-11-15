@@ -1,4 +1,5 @@
 import { InseeCommune } from './inseeCommune.model';
+import { VlAccuracyEnum } from './vlAccuracy.enum';
 
 /**
  * Location model
@@ -7,12 +8,14 @@ import { InseeCommune } from './inseeCommune.model';
 
 export interface LocationModel {
   geometry: any;
+  centroid: any;
   geodatum: string;
   locality: string;
   // inseeCode: string;
   elevation: number;
   publishedLocation: 'précise' | 'localité' | '10x10km';
-  locationAccuracy: number;
+  locationAccuracy: 'Localité' | 'Lieu-dit' | '0 à 10 m' | '10 à 100 m' | '100 à 500 m';
+  vlLocationAccuracy: VlAccuracyEnum;
   station: string;
   sublocality: string;
   localityConsistency: boolean;

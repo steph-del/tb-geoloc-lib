@@ -55,17 +55,26 @@ Par défaut, aucun paramètre n'est obligatoire. Si vous vous contentez d'insér
 | getOsmSimpleLine          |        | boolean  |          | false            | Si Nominatim renvoie une objet polyline, il sera converti en ligne simple (2 points). Options utilisée pour le programme "Sauvages de ma rue". |
 | showLatLngElevationInputs |        | boolean  |          | true             | Affiche les champs de latitude, longitude et altitude. Si false, les données lat, long et altitude sont affichées sous forme de texte et sous la carte.
 | latLngFormat              |        | string   | `'dec'` | `'dms'` | `'dec'`   | Format de saisie des coordonnées (décimal ou degrés minutes secondes)
+| elevationProvider         |        | string   | 'openElevation' \| 'elevationApiIo' \| 'mapQuest' | 'openElevation' | Service altitudinal à utiliser
 | osmNominatimApiUrl        |        | string   |          | 'https://nominatim.openstreetmap.org'       | URL de l'API Nominatim chez OSM
 | mapQuestNominatimApiUrl   |        | string   |          | 'https://open.mapquestapi.com/nominatim/v1' | URL de l'API Nominatim chez MapQuest
 | openElevationApiUrl       |        | string   |          | 'https://api.open-elevation.com/api/v1'     | URL de l'API OpenElevation
+| elevationApiIoApiUrl      |        | string   |          | 'https://elevation-api.io/api/elevation'    | URL de l'API elevationApi (http://elevation-api.io)
 | mapQuestElevationApiUrl   |        | string   |          | 'https://open.mapquestapi.com/elevation/v1' | URL de l'API Elevation de MapQuest
 | frGeoApiUrl               |        | string   |          | 'https://geo.api.gouv.fr'                   | URL de l'API des référentiels géographiques français
+| osmTilesLayerApi          |        | string   |          | 'https://{s}.tile.openstreetmap.org'        | URL de l'API OSM fournissant les tuiles |
 | patchAddress              |        | string   |          |                  | rempli le champ 'adresse' sans émettre d'évènement |
+| setAddress                |        | string   |          |                  | rempli le champ 'adresse' et émet un évènement |
 | patchElevation            |        | string   |          |                  | rempli le champ 'altitude' sans émettre d'évènement |
 | patchLngLatDec            |        | `[number, number]` ([longitude, latitude])  |    |                  | rempli les champs 'latitude' et 'longitude (décimal) et calcul les valeurs pour les champs 'latitude' et 'longitude (DMS) sans émettre d'évènement |
 | patchGeometry             |        | `Array<{type: string, coordinates: Array<[number, number]>}>` | | | dessine un ou plusieurs points, polylignes ou polygones. Si seul un point est passé en paramètre, c'est un marqueur déplaçable qui est dessiné. l'auto-completion (API) n'est pas exécutée. |
 | drawMarker                |        | `[number, number]` ([longitude, latitude])  |          |                  | dessine un marker (avec autocompletion de l'adresse et de l'altitude) |
 | reset                     |        | boolean  |          | false            | RAZ du composant si true |
+| enabled                   |        | boolean  |          | true             | Activation du composant. Si false, desactive les champs de saisie, les outils de dessin de la carte en bloque le zoom |
+| height                    |        | string   |          | '400px'          | Hauteur de la carte. Attention, ce paramètre doit être de type string et il est préférable de le passer sous la forme `'"200px"'` ou `'"50%"'` |
+| width                     |        | string   |          | '100%'           | Largeur de la carte. Attention, ce paramètre doit être de type string et il est préférable de le passer sous la forme `'"200px"'` ou `'"50%"'` |
+| inputFocus                |        | boolean  |          |                  | place le focus sur le champ de recherche si true |
+| placeMarkerWhenReverseGeocoding |  | boolean  |          | true             | Lors d'une recherche de lieu (reverse geocoding), le lieu selectionné dans l'autocomplète est mis en avant et, s'il s'agit d'un polygone, un marqueur est ajouté à son centre. La géométrie renvoyée est alors celle du marqueur et pas celle du polygone. Si false, aucun marqueur n'est ajouté et c'est le polygone qui est renvoyé comme géométrie. |
 
 Note : par défaut, les paramètres en entrée d'un composant Angular sont du type `string`. Pour tout autre type de paramètre, ne pas oublier d'indiquer qu'ils doivent être interprétés. Par ex, utiliser `[marker]="false"` plutôt que `marker="false"`.
 
