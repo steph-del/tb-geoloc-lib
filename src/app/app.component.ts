@@ -19,8 +19,6 @@ export class AppComponent {
   patchGeometry: any;
   enabled = true;
   osmClassFilter = ['place:*', 'boundary:*', 'highway:*'];
-  lngLatInit = [6.6150, 0.2362];
-  zoomInit = 10.6;
 
   public toggleEnabled() {
     this.enabled = !this.enabled;
@@ -93,6 +91,22 @@ export class AppComponent {
   }
 
   public testPatchGeometry2() {
+    this.patchGeometry = [
+      {
+        type: 'MultiPolygon',
+        coordinates: [
+          [
+            [0.22, 44.26], [0.23, 44.26], [0.23, 44.25], [0.22, 44.25]
+          ],
+          [
+            [0.26, 44.27], [0.27, 44.24], [0.24, 44.24]
+          ]
+        ]
+      }
+    ];
+  }
+
+  public testPatchGeometry2b() {
     this.patchGeometry = [
       {
         type: 'Point',

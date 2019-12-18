@@ -1093,12 +1093,26 @@ export class MapComponent implements OnInit, OnDestroy {
       // @Note Leaflet is not supporting multi polygond (not by this way at less)
       //       but adding multipoint here avoid function crach
       if (item.type.toLowerCase() === 'polygon' || item.type.toLowerCase() === 'multipolygon') {
-        const coords: any = [];
-        for (const c of item.coordinates) {
-          coords.push(new L.LatLng(c[1], c[0]));
+        let coords: any = [];
+        if (item.type.toLowerCase() === 'polygon') {
+          for (const c of item.coordinates) {
+            coords.push(new L.LatLng(c[1], c[0]));
+          }
+          const m = new L.Polygon(coords);
+          m.addTo(this.drawnItems);
+        } else if (item.type.toLowerCase() === 'multipolygon') {
+          const multiPolygon = Array<any>(item.coordinates);
+          for (const polygons of multiPolygon) {
+            for (const p of polygons) {
+              coords = [];
+              for (const coordinates of p) {
+                coords.push(new L.LatLng(coordinates[1], coordinates[0]));
+              }
+              const m = new L.Polygon(coords);
+              m.addTo(this.drawnItems);
+            }
+          }
         }
-        const m = new L.Polygon(coords);
-        m.addTo(this.drawnItems);
 
         this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
       }
