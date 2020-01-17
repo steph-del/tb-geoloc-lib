@@ -122,6 +122,8 @@ export class MapComponent implements OnInit, OnDestroy {
   isLoadingLatitude = false;
   isLoadingLongitude = false;
   isLoadingElevation = false;
+  inputValue: string;         // user's location value (lat/lng or address)
+  inputValuePrepend: string;
 
   // -------------
   // SUBSCRIPTIONS
@@ -401,6 +403,7 @@ export class MapComponent implements OnInit, OnDestroy {
           this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
         }).addTo(this.drawnItems);
       } else {
+        this.inputValuePrepend = 'Géométrie avec comme centroïde ';
         this.drawnItems.addLayer(this.drawnItem);
       }
 
@@ -519,11 +522,14 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // Set (decimal) latLng inputs
     this.latlngFormGroup.controls.latInput.setValue(geopoint.getLatDec(), { emitEvent: false });
-    this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLatDec(), { emitEvent: false });
+    this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLonDec(), { emitEvent: false });
 
     // Set location accuracy
     this.setLocationAccuracy('10 à 100 m');
     this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
+
+    // Set location input value
+    this.inputValue = `${this.latlngFormGroup.controls.dmsLatInput.value} ${this.latlngFormGroup.controls.dmsLngInput.value}`;
 
     // Fly
     this.flyToDrawnItems();
@@ -555,6 +561,9 @@ export class MapComponent implements OnInit, OnDestroy {
     // Set location accuracy
     this.setLocationAccuracy('10 à 100 m');
     this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
+
+    // Set location input value
+    this.inputValue = `N${this.latlngFormGroup.controls.latInput.value} E${this.latlngFormGroup.controls.lngInput.value}`;
 
     // Fly
     this.flyToDrawnItems();
@@ -601,6 +610,10 @@ export class MapComponent implements OnInit, OnDestroy {
     let elevation: any;
     let osmPlace: any;
     let inseeData: InseeCommune;
+
+    // Set location input value
+    this.inputValue = (this.inputValuePrepend !== null ? this.inputValuePrepend : '') + `N${this.latlngFormGroup.controls.latInput.value} E${this.latlngFormGroup.controls.lngInput.value}`;
+    this.inputValuePrepend = null;
 
     if (avoidCallingElevationApi && !avoidCallingGeolocApi) {
       httpTasks = zip(
@@ -799,6 +812,9 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setLocationAccuracy('Localité');
     this.setVlLocationAccuracy(osmPlace);
 
+    // Set location input
+    this.inputValue = this.geoSearchFormGroup.controls.placeInput.value;
+
   }
 
   /**
@@ -836,6 +852,8 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   resetLocation() {
     this._location = <LocationModel>{};
+    this.inputValue = null;
+    this.inputValuePrepend = null;
   }
 
   setLocationAccuracy(locAcc: 'Localité' | 'Lieu-dit' | '0 à 10 m' | '10 à 100 m' | '100 à 500 m'): void {
@@ -920,6 +938,8 @@ export class MapComponent implements OnInit, OnDestroy {
       this._location.publishedLocation = null;     // perform
       this._location.station = null;               // perform
     }
+
+    this._location.inputLocation = this.inputValue !== null ? this.inputValue : null;
 
     // Emit
     this.location.next(this._location);

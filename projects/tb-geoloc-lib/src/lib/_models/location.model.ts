@@ -32,4 +32,6 @@ export interface LocationModel {
   osmPlaceId: number;
 
   inseeData: InseeCommune;
+
+  inputLocation?: string;   // location provided by user (lat/lng or address)
 }
