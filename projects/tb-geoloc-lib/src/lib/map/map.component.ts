@@ -1121,15 +1121,18 @@ export class MapComponent implements OnInit, OnDestroy {
           const m = new L.Polygon(coords);
           m.addTo(this.drawnItems);
         } else if (item.type.toLowerCase() === 'multipolygon') {
-          const multiPolygon = Array<any>(item.coordinates);
-          for (const polygons of multiPolygon) {
-            for (const p of polygons) {
-              coords = [];
-              for (const coordinates of p) {
-                coords.push(new L.LatLng(coordinates[1], coordinates[0]));
+          const coordinates = item.coordinates as any;
+          const c: Array<Array<Array<Array<number[]>>>> = Array<Array<Array<Array<number[]>>>>(coordinates);
+          for (const polygonsWrapper of c) {
+            for (const polygons of polygonsWrapper) {
+              for (const p of polygons) {
+                coords = [];
+                for (const _coordinates of p) {
+                  coords.push(new L.LatLng(_coordinates[1], _coordinates[0]));
+                }
+                const m = new L.Polygon(coords);
+                m.addTo(this.drawnItems);
               }
-              const m = new L.Polygon(coords);
-              m.addTo(this.drawnItems);
             }
           }
         }
