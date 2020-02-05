@@ -42,7 +42,7 @@ export class GeocodingService {
   }
 
   private geocodeSpecificUsingOSM(country: string | undefined, county: string | undefined, city: string | undefined, place: string | undefined, limit: number | undefined): Observable<Array<NominatimObject>> {
-    const parameters = `?format=json&addressdetails=1&format=json&polygon_geojson=1${limit ? '&limit=' + limit : null}`;
+    const parameters = `?format=json&addressdetails=1&format=json&polygon_geojson=1${limit ? '&limit=' + limit : ''}`;
 
     if (!city && !county && !country && !place) { return of([]); }
 
