@@ -1,4 +1,6 @@
 import { Component, EventEmitter } from '@angular/core';
+import { GeocodingService } from 'projects/tb-geoloc-lib/src/lib/_services/geocoding.service';
+// import { GeocodingService } from 'tb-geoloc-lib/lib/_services/geocoding.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +21,14 @@ export class AppComponent {
   patchGeometry: any;
   enabled = true;
   osmClassFilter = ['place:*', 'boundary:*', 'highway:*'];
+
+  specificInputCountry = '';
+  specificInputCounty = '';
+  specificInputCity = '';
+  specificInputPlace = '';
+  specificLimit = 1;
+
+  constructor(private geocodingService: GeocodingService) { }
 
   public toggleEnabled() {
     this.enabled = !this.enabled;
@@ -140,6 +150,17 @@ export class AppComponent {
     setTimeout(() => {
       this.inputFocus = false;
     }, 100);
+  }
+
+  public logSpecificSearch() {
+    this.geocodingService.geocodeSpecific(this.specificInputCountry,
+                                          this.specificInputCounty,
+                                          this.specificInputCity,
+                                          this.specificInputPlace,
+                                          this.specificLimit).subscribe(
+                                            result => console.log(result),
+                                            error => console.log(error)
+                                          );
   }
 }
 

@@ -12,7 +12,7 @@ import { isDefined } from '@angular/compiler/src/util';
 })
 export class GeocodingService {
   mapQuestApiKey: string = null;
-  osmNominatimApiUrl: string = null;
+  osmNominatimApiUrl = 'https://nominatim.openstreetmap.org';
   mapQuestNominatimApiUrl: string = null;
   frGeoApiUrl: string = null;
 
@@ -22,10 +22,43 @@ export class GeocodingService {
     if (apiKey !== null) { this.mapQuestApiKey = apiKey; }
   }
 
+  /**
+   * Geocode an address
+   * @param address a simple string representing the address
+   * @param provider 'osm' | 'mapquest'
+   */
   geocode(address: string, provider: string): Observable<Array<NominatimObject>> {
     if (address === null) { return empty(); } // Avoid sending request on form reset
     if (provider.toLowerCase() === 'osm') { return this.geocodeUsingOSM(address); }
     if (provider.toLowerCase() === 'mapquest') { return this.geocodeUsingMapQuest(address); }
+  }
+
+  /**
+   * Geocode a specific address
+   * only with OSM provider for now
+   */
+  geocodeSpecific(country: string | undefined, county: string | undefined, city: string | undefined, place: string | undefined, limit: number | undefined): Observable<Array<NominatimObject>> {
+    return this.geocodeSpecificUsingOSM(country, county, city, place, limit);
+  }
+
+  private geocodeSpecificUsingOSM(country: string | undefined, county: string | undefined, city: string | undefined, place: string | undefined, limit: number | undefined): Observable<Array<NominatimObject>> {
+    const parameters = `?format=json&addressdetails=1&format=json&polygon_geojson=1${limit ? '&limit=' + limit : null}`;
+
+    if (!city && !county && !country && !place) { return of([]); }
+
+    let query =  parameters;
+    if (city) { query += `&city=${city}`; }
+    if (county) { query += `&county=${county}`; }
+    if (country) { query += `&country=${country}`; }
+    if (place) { query += `&place=${place}`; }
+
+    const apiUrl = `${this.osmNominatimApiUrl}/${query}`;
+    return this.http.get<Array<NominatimObject>>(apiUrl);
+  }
+
+  private geocodeSpecificUsingMapQuest(): Observable<Array<NominatimObject>> {
+    // @Todo
+    return of([]);
   }
 
   reverse(lat: number, lng: number, provider: string): Observable<any> {

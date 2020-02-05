@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { TbGeolocLibModule } from 'tb-geoloc-lib';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -10,7 +11,9 @@ import { TbGeolocLibModule } from 'tb-geoloc-lib';
   ],
   imports: [
     BrowserModule,
-    TbGeolocLibModule
+    TbGeolocLibModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

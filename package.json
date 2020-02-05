@@ -8,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build_serve": "ng build --prod tb-geoloc-lib && ng serve",
+    "build_serve": "ng build --prod tb-geoloc-lib && ng serve --port 4201",
     "build_lib": "ng build --prod tb-geoloc-lib",
     "npm_pack": "cd dist/tb-geoloc-lib && npm pack",
     "build_pack": "ng build --prod tb-geoloc-lib && npm run npm_pack"

@@ -36,3 +36,13 @@
 <p (click)="testPatchGeometry2()">TEST patch geometry ++</p>
 <p (click)="testSetAddress()">TEST set address</p>
 <p (click)="testSetFocus()">TEST set focus on input</p>
+
+<div>
+  <p>Geocode specific address</p>
+  <input placeholder="country" [(ngModel)]="specificInputCountry"/>
+  <input placeholder="county (dep)" [(ngModel)]="specificInputCounty"/>
+  <input placeholder="city" [(ngModel)]="specificInputCity"/>
+  <input placeholder="place" [(ngModel)]="specificInputPlace"/>
+  <input placeholder="limit" [(ngModel)]="specificLimit" type="number"/>
+  <button (click)="logSpecificSearch()">Lancer la recherche</button>
+</div>
