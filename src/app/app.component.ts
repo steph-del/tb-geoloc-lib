@@ -166,14 +166,23 @@ export class AppComponent {
   }
 
   public logSpecificSearch() {
-    this.geocodingService.geocodeSpecific(this.specificInputCountry,
-                                          this.specificInputCounty,
-                                          this.specificInputCity,
-                                          this.specificInputPlace,
-                                          this.specificLimit).subscribe(
-                                            result => console.log(result),
-                                            error => console.log(error)
-                                          );
+    this.geocodingService.geocodeSpecificUsingOSM(this.specificInputCountry,
+                                                  this.specificInputCounty,
+                                                  this.specificInputCity,
+                                                  this.specificInputPlace,
+                                                  this.specificLimit).subscribe(
+                                                    result => console.log(result),
+                                                    error => console.log(error)
+                                                  );
+      this.geocodingService.geocodeSpecificUsingMapQuest('ApIFfQWsb8jW6bkYDD2i0Sq5BD9moJ3l',
+                                                        this.specificInputCountry,
+                                                        this.specificInputCounty,
+                                                        this.specificInputCity,
+                                                        this.specificInputPlace,
+                                                        this.specificLimit).subscribe(
+                                                        result => console.log(result),
+                                                        error => console.log(error)
+                                                      );
   }
 }
 
