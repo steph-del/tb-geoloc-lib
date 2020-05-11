@@ -119,11 +119,20 @@ export class GeocodingService {
     let road: string = null;
     let neighbourhood: string = null;
 
+    const _city = osmPlaceResult.address.city !== undefined ? osmPlaceResult.address.city : null;
+    const _town = osmPlaceResult.address.town !== undefined ? osmPlaceResult.address.town : null;
+    const _village = osmPlaceResult.address.village !== undefined ? osmPlaceResult.address.village : null;
+    const _hamlet = osmPlaceResult.address.hamlet !== undefined ? osmPlaceResult.address.hamlet : null;
+
     // Get "city" information (I mean city or something similar like village)
-    if (isDefined(osmPlaceResult.address.city)) { locality = osmPlaceResult.address.city;
-    } else if (isDefined(osmPlaceResult.address.town)) { locality = osmPlaceResult.address.town;
-    } else if (isDefined(osmPlaceResult.address.village)) { locality = osmPlaceResult.address.village;
-    } else if (isDefined(osmPlaceResult.address.hamlet)) { locality = osmPlaceResult.address.hamlet; }
+    if (_city) {
+      locality = _city + (_hamlet !== null ? ` (${osmPlaceResult.address.hamlet})` : '');
+    } else if (_town !== null) {
+      locality = _town + (_hamlet !== null ? ` (${osmPlaceResult.address.hamlet})` : '');
+    } else if (_village !== null) {
+      locality = _village + (_hamlet !== null ? ` (${osmPlaceResult.address.hamlet})` : '');
+    } else if (osmPlaceResult.address.hamlet !== null) {
+      locality = osmPlaceResult.address.hamlet; }
 
     // Get suburbr & if not defined : postcode
     if (isDefined(osmPlaceResult.address.suburb) && isDefined(osmPlaceResult.address.postcode) && locality !== null) {
@@ -231,6 +240,21 @@ export class GeocodingService {
       return of(osmFilteredResults);
     } else {
       return of(osmResults);
+    }
+  }
+
+  geometryFilter(geometryFilter: Array<string>, osmResults: Array<NominatimObject>): Array<NominatimObject> {
+    const geometryFilteredResults: Array<NominatimObject> = [];
+
+    if (geometryFilter.length > 0 && osmResults.length > 0) {
+      osmResults.forEach(osmItem => {
+        if (osmItem.geojson && (geometryFilter.indexOf(osmItem.geojson.type.toLowerCase()) !== -1)) {
+          geometryFilteredResults.push(osmItem);
+        }
+      });
+      return geometryFilteredResults;
+    } else {
+      return osmResults;
     }
   }
 

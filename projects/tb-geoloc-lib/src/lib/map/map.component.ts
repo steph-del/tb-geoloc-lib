@@ -37,6 +37,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this._geolocatedPhotoLatLng.emit(value);
   }
   @Input() osmClassFilter: Array<string> = [];
+  @Input() geometryFilter: Array<'point' | 'polygon' | 'linestring'> = [];
   @Input() allowEditDrawnItems = false;
   @Input() marker = true;
   @Input() polyline = true;
@@ -211,14 +212,25 @@ export class MapComponent implements OnInit, OnDestroy {
       }
       results.sort((a, b) => b.score - a.score);
       this.isLoadingAddress = false;
+
+      let _results: Array<NominatimObject> = [];
+
       // filter results if needed
       if (this.osmClassFilter.length > 0) {
         this.geocodeService.osmClassFilter(this.osmClassFilter, results).subscribe(filteredResults => {
-          this.geoSearchResults = filteredResults;
+          _results = filteredResults;
         });
       } else {
-        this.geoSearchResults = results;
+        _results = results;
       }
+
+      // filter results by geometry
+      if (this.geometryFilter.length > 0) {
+        this.geoSearchResults = this.geocodeService.geometryFilter(this.geometryFilter, results);
+      } else {
+        this.geoSearchResults = _results;
+      }
+
     }, (error) => {
       this.httpError.next(error);
       this.isLoadingAddress = false;
@@ -949,6 +961,12 @@ export class MapComponent implements OnInit, OnDestroy {
     const _class = nominatimObj.class;
     let accuracy: VlAccuracyEnum;
 
+    // ...way case
+    if (_class.toLowerCase().indexOf('way') !== -1) {
+      accuracy = VlAccuracyEnum.PLACE;
+      return accuracy;
+    }
+
     switch (_class) {
       case 'boundary':
         // could be commune departement, region or country
@@ -971,7 +989,13 @@ export class MapComponent implements OnInit, OnDestroy {
       case 'place':
         accuracy = VlAccuracyEnum.PLACE;
         break;
-      case (_class.match(/way/)).input:
+      case 'amenity':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case 'building':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case 'historic':
         accuracy = VlAccuracyEnum.PLACE;
         break;
       default:
