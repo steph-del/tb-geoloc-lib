@@ -122,6 +122,8 @@ export class MapComponent implements OnInit, OnDestroy {
   isLoadingLatitude = false;
   isLoadingLongitude = false;
   isLoadingElevation = false;
+  inputValue: string;         // user's location value (lat/lng or address)
+  inputValuePrepend: string;
 
   // -------------
   // SUBSCRIPTIONS
@@ -398,8 +400,10 @@ export class MapComponent implements OnInit, OnDestroy {
             this.callGeolocElevationApisUsingLatLngInputsValues();
           });
           this.setLocationAccuracy('10 à 100 m');
+          this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
         }).addTo(this.drawnItems);
       } else {
+        this.inputValuePrepend = 'Géométrie avec comme centroïde ';
         this.drawnItems.addLayer(this.drawnItem);
       }
 
@@ -509,15 +513,23 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setMapEditMode();
     // @TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(this.latlngFormGroup.controls.dmsLngInput.value, this.latlngFormGroup.controls.dmsLatInput.value);
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); this.setLocationAccuracy('10 à 100 m'); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (e) => {
+      /* dragend callback fn */
+      this.clearGeoResultsLayer();
+      this.callGeolocElevationApisUsingLatLngInputsValues();
+      this.setLocationAccuracy('10 à 100 m');
+      this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE; }).addTo(this.drawnItems);
 
     // Set (decimal) latLng inputs
     this.latlngFormGroup.controls.latInput.setValue(geopoint.getLatDec(), { emitEvent: false });
-    this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLatDec(), { emitEvent: false });
+    this.latlngFormGroup.controls.lngInput.setValue(geopoint.getLonDec(), { emitEvent: false });
 
     // Set location accuracy
     this.setLocationAccuracy('10 à 100 m');
     this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
+
+    // Set location input value
+    this.inputValue = `${this.latlngFormGroup.controls.dmsLatInput.value} ${this.latlngFormGroup.controls.dmsLngInput.value}`;
 
     // Fly
     this.flyToDrawnItems();
@@ -535,7 +547,12 @@ export class MapComponent implements OnInit, OnDestroy {
 
     // TODO check latitude and longitude values (format + limits)
     const geopoint = new GeoPoint(Number(this.latlngFormGroup.controls.lngInput.value), Number(this.latlngFormGroup.controls.latInput.value));
-    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => { /* dragend callback fn */ this.clearGeoResultsLayer(); this.callGeolocElevationApisUsingLatLngInputsValues(); this.setLocationAccuracy('10 à 100 m'); }).addTo(this.drawnItems);
+    leafletObjects.draggableMarker(geopoint.getLatDec(), geopoint.getLonDec(), (dragEnd) => {
+      /* dragend callback fn */
+      this.clearGeoResultsLayer();
+      this.callGeolocElevationApisUsingLatLngInputsValues();
+      this.setLocationAccuracy('10 à 100 m');
+      this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE; }).addTo(this.drawnItems);
 
     // Set dmsLatLng inputs
     this.latlngFormGroup.controls.dmsLatInput.setValue(geopoint.getLatDeg(), { emitEvent: false });
@@ -544,6 +561,9 @@ export class MapComponent implements OnInit, OnDestroy {
     // Set location accuracy
     this.setLocationAccuracy('10 à 100 m');
     this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
+
+    // Set location input value
+    this.inputValue = `N${this.latlngFormGroup.controls.latInput.value} E${this.latlngFormGroup.controls.lngInput.value}`;
 
     // Fly
     this.flyToDrawnItems();
@@ -590,6 +610,10 @@ export class MapComponent implements OnInit, OnDestroy {
     let elevation: any;
     let osmPlace: any;
     let inseeData: InseeCommune;
+
+    // Set location input value
+    this.inputValue = (this.inputValuePrepend !== null ? this.inputValuePrepend : '') + `N${this.latlngFormGroup.controls.latInput.value} E${this.latlngFormGroup.controls.lngInput.value}`;
+    this.inputValuePrepend = null;
 
     if (avoidCallingElevationApi && !avoidCallingGeolocApi) {
       httpTasks = zip(
@@ -788,6 +812,9 @@ export class MapComponent implements OnInit, OnDestroy {
     this.setLocationAccuracy('Localité');
     this.setVlLocationAccuracy(osmPlace);
 
+    // Set location input
+    this.inputValue = this.geoSearchFormGroup.controls.placeInput.value;
+
   }
 
   /**
@@ -825,6 +852,8 @@ export class MapComponent implements OnInit, OnDestroy {
    */
   resetLocation() {
     this._location = <LocationModel>{};
+    this.inputValue = null;
+    this.inputValuePrepend = null;
   }
 
   setLocationAccuracy(locAcc: 'Localité' | 'Lieu-dit' | '0 à 10 m' | '10 à 100 m' | '100 à 500 m'): void {
@@ -909,6 +938,8 @@ export class MapComponent implements OnInit, OnDestroy {
       this._location.publishedLocation = null;     // perform
       this._location.station = null;               // perform
     }
+
+    this._location.inputLocation = this.inputValue !== null ? this.inputValue : null;
 
     // Emit
     this.location.next(this._location);
@@ -1058,6 +1089,7 @@ export class MapComponent implements OnInit, OnDestroy {
               this.callGeolocElevationApisUsingLatLngInputsValues();
             });
             this.setLocationAccuracy('10 à 100 m');
+            this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
           });
         } else if (value.length > 1) {
           m = new L.Marker(latLng, {icon: leafletObjects.simpleIconMarker()});
@@ -1073,18 +1105,39 @@ export class MapComponent implements OnInit, OnDestroy {
         }
         const m = new L.Polyline(coords);
         m.addTo(this.drawnItems);
+
+        this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
       }
 
       // polygon
       // @Note Leaflet is not supporting multi polygond (not by this way at less)
       //       but adding multipoint here avoid function crach
       if (item.type.toLowerCase() === 'polygon' || item.type.toLowerCase() === 'multipolygon') {
-        const coords: any = [];
-        for (const c of item.coordinates) {
-          coords.push(new L.LatLng(c[1], c[0]));
+        let coords: any = [];
+        if (item.type.toLowerCase() === 'polygon') {
+          for (const c of item.coordinates) {
+            coords.push(new L.LatLng(c[1], c[0]));
+          }
+          const m = new L.Polygon(coords);
+          m.addTo(this.drawnItems);
+        } else if (item.type.toLowerCase() === 'multipolygon') {
+          const coordinates = item.coordinates as any;
+          const c: Array<Array<Array<Array<number[]>>>> = Array<Array<Array<Array<number[]>>>>(coordinates);
+          for (const polygonsWrapper of c) {
+            for (const polygons of polygonsWrapper) {
+              for (const p of polygons) {
+                coords = [];
+                for (const _coordinates of p) {
+                  coords.push(new L.LatLng(_coordinates[1], _coordinates[0]));
+                }
+                const m = new L.Polygon(coords);
+                m.addTo(this.drawnItems);
+              }
+            }
+          }
         }
-        const m = new L.Polygon(coords);
-        m.addTo(this.drawnItems);
+
+        this._location.vlLocationAccuracy = VlAccuracyEnum.PRECISE;
       }
     }
     this.setMapEditMode();

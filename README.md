@@ -121,6 +121,7 @@ LocationModel :
 | osmId               | number                           | 
 | osmPlaceId          | number                           | 
 | inseeData           | InseeCommune                     | voir le model "Commune" : https://api.gouv.fr/api/api-geo.html#doc_tech
+| inputLocation       | string                           | coordonnées saisies par l'utilisateur
 
 ## Serveur de développement
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, empty, of } from 'rxjs';
+import { Observable, empty, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NominatimObject } from '../_models/nominatimObj.model';
 import { OsmPlaceModel, MapQuestPlaceModel } from '../_models/osmPlace.model';
@@ -11,21 +11,62 @@ import { isDefined } from '@angular/compiler/src/util';
   providedIn: 'root'
 })
 export class GeocodingService {
-  mapQuestApiKey: string = null;
-  osmNominatimApiUrl: string = null;
-  mapQuestNominatimApiUrl: string = null;
+  mapQuestApiKey = new BehaviorSubject<string>('');
+  osmNominatimApiUrl = 'https://nominatim.openstreetmap.org';
+  mapQuestNominatimApiUrl = 'https://open.mapquestapi.com/nominatim/v1/search.php';
   frGeoApiUrl: string = null;
 
   constructor(private http: HttpClient) { }
 
   public setMapQuestApiKey(apiKey: string): void {
-    if (apiKey !== null) { this.mapQuestApiKey = apiKey; }
+    if (apiKey !== null) { this.mapQuestApiKey.next(apiKey); }
   }
 
+  /**
+   * Geocode an address
+   * @param address a simple string representing the address
+   * @param provider 'osm' | 'mapquest'
+   */
   geocode(address: string, provider: string): Observable<Array<NominatimObject>> {
     if (address === null) { return empty(); } // Avoid sending request on form reset
     if (provider.toLowerCase() === 'osm') { return this.geocodeUsingOSM(address); }
     if (provider.toLowerCase() === 'mapquest') { return this.geocodeUsingMapQuest(address); }
+  }
+
+  /**
+   * Geocode a specific address
+   * only with OSM provider for now
+   */
+  /*geocodeSpecific(provider = 'osm', country: string | undefined, county: string | undefined, city: string | undefined, place: string | undefined, limit: number | undefined): Observable<Array<NominatimObject>> {
+    if (provider.toLowerCase() === 'osm') { return this.geocodeSpecificUsingOSM(country, county, city, place, limit); }
+    if (provider.toLowerCase() === 'mapquest') { return this.geocodeSpecificUsingMapQuest(country, county, city, place, limit); }
+  }*/
+
+  public geocodeSpecificUsingOSM(country: string | undefined, county: string | undefined, city: string | undefined, place: string | undefined, limit: number | undefined): Observable<Array<NominatimObject>> {
+    const parameters = `?format=json&addressdetails=1&format=json&polygon_geojson=1${limit ? '&limit=' + limit : ''}`;
+
+    if (!city && !county && !country && !place) { return of([]); }
+
+    let query =  parameters;
+    if (city) { query += `&city=${city}`; }
+    if (county) { query += `&county=${county}`; }
+    if (country) { query += `&country=${country}`; }
+    if (place) { query += `&place=${place}`; }
+    const apiUrl = `${this.osmNominatimApiUrl}/${query}`;
+    return this.http.get<Array<NominatimObject>>(apiUrl);
+  }
+
+  public geocodeSpecificUsingMapQuest(mapquestKey: string, country: string | undefined, county: string | undefined, city: string | undefined, place: string | undefined, limit: number | undefined): Observable<Array<NominatimObject>> {
+    const parameters = `?key=${mapquestKey}&format=json&addressdetails=1&format=json&polygon_geojson=1${limit ? '&limit=' + limit : ''}`;
+    if (!city && !county && !country && !place) { return of([]); }
+
+    let query =  parameters;
+    if (city) { query += `&city=${city}`; }
+    if (county) { query += `&county=${county}`; }
+    if (country) { query += `&country=${country}`; }
+    if (place) { query += `&place=${place}`; }
+    const apiUrl = `${this.mapQuestNominatimApiUrl}/${query}`;
+    return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
   reverse(lat: number, lng: number, provider: string): Observable<any> {
@@ -53,8 +94,8 @@ export class GeocodingService {
     return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
-  geocodeUsingMapQuest(address: string): Observable<Array<NominatimObject>> {
-    const apiUrl = `${this.mapQuestNominatimApiUrl}/search.php?key=${this.mapQuestApiKey}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
+  geocodeUsingMapQuest(address: string, mapQuestKey?: string | undefined): Observable<Array<NominatimObject>> {
+    const apiUrl = `${this.mapQuestNominatimApiUrl}/search.php?key=${this.mapQuestApiKey.getValue()}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
     return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
@@ -64,7 +105,7 @@ export class GeocodingService {
   }
 
   reverseUsingMapQuest(lat: number, lng: number): Observable<NominatimObject> {
-    const apiUrl = `${this.mapQuestNominatimApiUrl}/reverse?key=${this.mapQuestApiKey}&lat=${lat}&lon=${lng}`;
+    const apiUrl = `${this.mapQuestNominatimApiUrl}/reverse?key=${this.mapQuestApiKey.getValue()}&lat=${lat}&lon=${lng}`;
     return this.http.get<NominatimObject>(apiUrl);
   }
 
