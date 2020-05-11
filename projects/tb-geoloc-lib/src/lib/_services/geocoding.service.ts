@@ -94,7 +94,7 @@ export class GeocodingService {
     return this.http.get<Array<NominatimObject>>(apiUrl);
   }
 
-  geocodeUsingMapQuest(address: string): Observable<Array<NominatimObject>> {
+  geocodeUsingMapQuest(address: string, mapQuestKey?: string | undefined): Observable<Array<NominatimObject>> {
     const apiUrl = `${this.mapQuestNominatimApiUrl}/search.php?key=${this.mapQuestApiKey.getValue()}&addressdetails=1&q=${address}&format=json&limit=10&polygon_geojson=1`;
     return this.http.get<Array<NominatimObject>>(apiUrl);
   }
