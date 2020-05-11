@@ -21,6 +21,10 @@ export class AppComponent {
   patchGeometry: any;
   enabled = true;
   osmClassFilter = ['place:*', 'boundary:*', 'highway:*'];
+  geometryFilter = [];
+  _geoFilterPoint = false;
+  _geoFilterPolygon = false;
+  _geoFilterLinestring = false;
 
   specificInputCountry = '';
   specificInputCounty = '';
@@ -183,6 +187,30 @@ export class AppComponent {
                                                         result => console.log(result),
                                                         error => console.log(error)
                                                       );
+  }
+
+  filterPoint(): void {
+    this._geoFilterPoint = !this._geoFilterPoint;
+    this.setGeoFilters();
+  }
+
+  filterPolygon(): void {
+    this._geoFilterPolygon = !this._geoFilterPolygon;
+    this.setGeoFilters();
+  }
+
+  filterLinestring(): void {
+    this._geoFilterLinestring = !this._geoFilterLinestring;
+    this.setGeoFilters();
+  }
+
+  setGeoFilters(): void {
+    const _filters = [];
+    if (this._geoFilterPoint) { _filters.push('point'); }
+    if (this._geoFilterPolygon) { _filters.push('polygon'); }
+    if (this._geoFilterLinestring) { _filters.push('linestring'); }
+
+    this.geometryFilter = _filters;
   }
 }
 

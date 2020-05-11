@@ -18,6 +18,7 @@
     [height]="'500px'"
     [width]="'100%'"
     [osmClassFilter]="osmClassFilter"
+    [geometryFilter]="geometryFilter"
     [inputFocus]="inputFocus"
     [placeMarkerWhenReverseGeocoding]="true"
     (location)=locationChange($event)>
@@ -38,6 +39,10 @@
 <p (click)="testSetAddress()">TEST set address</p>
 <p (click)="testSetFocus()">TEST set focus on input</p>
 
+<label for="geometryFilter">Filtrer la géométrie :</label>
+<input type="checkbox" id="point" (change)="filterPoint()"><label for="point">Point</label>
+<input type="checkbox" id="polygon" (change)="filterPolygon()"><label for="polygon">Polygone</label>
+<input type="checkbox" id="linestring" (change)="filterLinestring()"><label for="linestring">Ligne</label>
 <div>
   <p>Geocode specific address</p>
   <input placeholder="country" [(ngModel)]="specificInputCountry"/>
