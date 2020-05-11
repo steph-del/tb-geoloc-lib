@@ -961,6 +961,12 @@ export class MapComponent implements OnInit, OnDestroy {
     const _class = nominatimObj.class;
     let accuracy: VlAccuracyEnum;
 
+    // ...way case
+    if (_class.toLowerCase().indexOf('way') !== -1) {
+      accuracy = VlAccuracyEnum.PLACE;
+      return accuracy;
+    }
+
     switch (_class) {
       case 'boundary':
         // could be commune departement, region or country
@@ -983,7 +989,13 @@ export class MapComponent implements OnInit, OnDestroy {
       case 'place':
         accuracy = VlAccuracyEnum.PLACE;
         break;
-      case (_class.match(/way/)).input:
+      case 'amenity':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case 'building':
+        accuracy = VlAccuracyEnum.PLACE;
+        break;
+      case 'historic':
         accuracy = VlAccuracyEnum.PLACE;
         break;
       default:
