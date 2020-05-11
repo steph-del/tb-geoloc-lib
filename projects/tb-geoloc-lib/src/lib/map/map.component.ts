@@ -37,6 +37,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this._geolocatedPhotoLatLng.emit(value);
   }
   @Input() osmClassFilter: Array<string> = [];
+  @Input() geometryFilter: Array<'point' | 'polygon' | 'linestring'> = [];
   @Input() allowEditDrawnItems = false;
   @Input() marker = true;
   @Input() polyline = true;
@@ -211,14 +212,25 @@ export class MapComponent implements OnInit, OnDestroy {
       }
       results.sort((a, b) => b.score - a.score);
       this.isLoadingAddress = false;
+
+      let _results: Array<NominatimObject> = [];
+
       // filter results if needed
       if (this.osmClassFilter.length > 0) {
         this.geocodeService.osmClassFilter(this.osmClassFilter, results).subscribe(filteredResults => {
-          this.geoSearchResults = filteredResults;
+          _results = filteredResults;
         });
       } else {
-        this.geoSearchResults = results;
+        _results = results;
       }
+
+      // filter results by geometry
+      if (this.geometryFilter.length > 0) {
+        this.geoSearchResults = this.geocodeService.geometryFilter(this.geometryFilter, results);
+      } else {
+        this.geoSearchResults = _results;
+      }
+
     }, (error) => {
       this.httpError.next(error);
       this.isLoadingAddress = false;

@@ -234,6 +234,21 @@ export class GeocodingService {
     }
   }
 
+  geometryFilter(geometryFilter: Array<string>, osmResults: Array<NominatimObject>): Array<NominatimObject> {
+    const geometryFilteredResults: Array<NominatimObject> = [];
+
+    if (geometryFilter.length > 0 && osmResults.length > 0) {
+      osmResults.forEach(osmItem => {
+        if (osmItem.geojson && (geometryFilter.indexOf(osmItem.geojson.type.toLowerCase()) !== -1)) {
+          geometryFilteredResults.push(osmItem);
+        }
+      });
+      return geometryFilteredResults;
+    } else {
+      return osmResults;
+    }
+  }
+
   /**
    * Sometime, we have to reverse latitude and longitude according to Leaflet specifications
    */
