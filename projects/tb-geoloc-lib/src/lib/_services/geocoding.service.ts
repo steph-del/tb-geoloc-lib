@@ -119,11 +119,26 @@ export class GeocodingService {
     let road: string = null;
     let neighbourhood: string = null;
 
+    const _city = osmPlaceResult.address.city !== undefined ? osmPlaceResult.address.city : null;
+    const _town = osmPlaceResult.address.town !== undefined ? osmPlaceResult.address.town : null;
+    const _village = osmPlaceResult.address.village !== undefined ? osmPlaceResult.address.village : null;
+    const _hamlet = osmPlaceResult.address.hamlet !== undefined ? osmPlaceResult.address.hamlet : null;
+
+    console.log(osmPlaceResult);
+
     // Get "city" information (I mean city or something similar like village)
-    if (isDefined(osmPlaceResult.address.city)) { locality = osmPlaceResult.address.city;
-    } else if (isDefined(osmPlaceResult.address.town)) { locality = osmPlaceResult.address.town;
-    } else if (isDefined(osmPlaceResult.address.village)) { locality = osmPlaceResult.address.village;
-    } else if (isDefined(osmPlaceResult.address.hamlet)) { locality = osmPlaceResult.address.hamlet; }
+    if (_city) {
+      console.log('A');
+      locality = _city + (_hamlet !== null ? ` (${osmPlaceResult.address.hamlet})` : '');
+    } else if (_town !== null) {
+      console.log('B');
+      locality = _town + (_hamlet !== null ? ` (${osmPlaceResult.address.hamlet})` : '');
+    } else if (_village !== null) {
+      console.log('C');
+      locality = _village + (_hamlet !== null ? ` (${osmPlaceResult.address.hamlet})` : '');
+    } else if (osmPlaceResult.address.hamlet !== null) {
+      console.log('D');
+      locality = osmPlaceResult.address.hamlet; }
 
     // Get suburbr & if not defined : postcode
     if (isDefined(osmPlaceResult.address.suburb) && isDefined(osmPlaceResult.address.postcode) && locality !== null) {
