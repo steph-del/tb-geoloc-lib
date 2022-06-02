@@ -136,7 +136,7 @@
   dependencies:
     tslib "^1.9.0"
 
-"@angular/cdk@7.2.4":
+"@angular/cdk@7.3.2":
   version "7.3.2"
   resolved "https://registry.yarnpkg.com/@angular/cdk/-/cdk-7.3.2.tgz#33f525051d71e2525d29b2aa798c817334973a7b"
   integrity sha512-jnthvY1Kt+DpJTrkgyKTiVuYgBdp4iG7QDeZJPBQm0e8mL2K0Pi9AqFbo01E4CGPqZpvtEggvqM0OJpR8J+amw==
@@ -191,12 +191,12 @@
   dependencies:
     tslib "^1.9.0"
 
-"@angular/core@7.2.4":
-  version "7.2.4"
-  resolved "https://registry.yarnpkg.com/@angular/core/-/core-7.2.4.tgz#a6c84940c8edcfa37158f666a1f99c6e4a97bf95"
-  integrity sha512-kfAxhIxl89PmB7y81FR/RAv0yWRFcEYxEnTwV+o8jKGfemAXtQ0g/Vh+lJR0SD/TBgFilMxotN1mhwH4A8GShw==
+"@angular/core@11.0.5":
+  version "11.0.5"
+  resolved "https://registry.yarnpkg.com/@angular/core/-/core-11.0.5.tgz#b8c448c3cd4f6dae7327cc1ba4ee2aa29c8dbc26"
+  integrity sha512-XAXWQi7R3ucZXQwx9QK5jSKJeQyRJ53u2dQDpr7R5stzeCy1a5hrNOkZLg9zOTTPcth/6+FrOrRZP9SMdxtw3w==
   dependencies:
-    tslib "^1.9.0"
+    tslib "^2.0.0"
 
 "@angular/forms@7.2.4":
   version "7.2.4"
@@ -217,7 +217,7 @@
   resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-7.2.4.tgz#db72460040b070410cbff678410c142f4d682af8"
   integrity sha512-A9Rud/27hHMSUUjpgn57nVeLsoYgdvFwJhtlZA/oCuSpmlD+LqqBsEpPhivwn++u44+DSrFXsic29jlFnsBotw==
 
-"@angular/material@7.2.4":
+"@angular/material@7.3.2":
   version "7.3.2"
   resolved "https://registry.yarnpkg.com/@angular/material/-/material-7.3.2.tgz#9d1647689cf4a0892f099e021f97f5e8ab1332fa"
   integrity sha512-x3it941KE8zuzDH1VLP4yfgmC3hwrqa1a2GHiekztF2KrbWPzEEGNvlyYOUV7nwiuwFw5twON73rW0HUKndwEA==
@@ -7581,6 +7581,11 @@ tslib@^1.7.1, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
   integrity sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
+
+tslib@^2.0.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
 
 tslint@~5.9.1:
   version "5.9.1"
